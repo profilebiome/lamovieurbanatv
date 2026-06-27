@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin Panel - LA MOVIE URBANA</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  :root {
+    --bg-dark: #0A0A0B; --panel-bg: #1B1B1E;
+    --border: rgba(255,255,255,0.08);
+    --text-main: #F5F5F4; --text-muted: #9A9A9E;
+    --accent: #E4002B; --accent-hover: #9E0020;
+    --success: #10B981; --danger: #EF4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Manrope', system-ui, sans-serif; line-height: 1.5; padding: 20px; }
+  .admin-layout { display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  @media (min-width: 992px) { .admin-layout { grid-template-columns: 350px 1fr; } }
+  header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+  header h1 { font-size: 2rem; letter-spacing: 1px; }
+  header h1 span { color: var(--accent); }
+  .card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: box-shadow 0.3s ease; }
+  .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .card-title { font-size: 1.2rem; margin-bottom: 20px; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+  input, textarea { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 8px; font-family: inherit; transition: border-color 0.3s ease; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--accent); color: var(--text-main); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; font-family: inherit; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+  .btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); }
+  .btn-outline:hover { background: var(--bg-dark); border-color: var(--accent); }
+  .btn-danger { background: var(--danger); }
+  .btn-danger:hover { background: #b91c1c; }
+  .yt-preview { width: 100%; aspect-ratio: 16/9; background: var(--bg-dark); border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+  .yt-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .yt-preview span { color: var(--text-muted); font-size: 0.85rem; }
+  .video-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+  .video-item { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .video-thumb { aspect-ratio: 16/9; background: #000; position: relative; }
+  .video-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+  .video-info { padding: 16px; flex-grow: 1; }
+  .video-info h4 { font-size: 1rem; margin-bottom: 4px; }
+  .video-info p { font-size: 0.8rem; color: var(--text-muted); }
+  .video-actions { display: flex; border-top: 1px solid var(--border); }
+  .video-actions button { flex: 1; padding: 10px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; }
+  .video-actions button:hover { background: var(--panel-bg); color: var(--text-main); }
+  .video-actions .delete:hover { color: var(--danger); }
+  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: #fff; padding: 12px 24px; border-radius: 8px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Admin <span>Panel</span></h1>
+  <button class="btn btn-outline" onclick="saveAllChanges()">Guardar Textos en la Web</button>
+</header>
+
+<main class="admin-layout">
+  
+  <aside>
+    <section class="card" style="margin-bottom: 24px;">
+      <h2 class="card-title">Textos Principales</h2>
+      <div class="form-group">
+        <label>Etiqueta Superior (Eyebrow)</label>
+        <input type="text" id="webEyebrow" placeholder="Cargando...">
+      </div>
+      <div class="form-group">
+        <label>Título Principal (Usa &lt;br&gt; y &lt;em&gt;)</label>
+        <input type="text" id="webTitle" placeholder="Cargando...">
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="webDesc" rows="3" placeholder="Cargando..."></textarea>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Agregar Nuevo Video</h2>
+      <div class="form-group">
+        <label>Enlace de YouTube (URL)</label>
+        <input type="url" id="ytUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="processYouTubeUrl()">
+      </div>
+      
+      <div class="yt-preview" id="ytPreview">
+        <span>La portada aparecerá aquí</span>
+      </div>
+
+      <div class="form-group" style="margin-top: 16px;">
+        <label>ID del Video (Automático)</label>
+        <input type="text" id="vidId" readonly placeholder="Ej: aBcDeFgHiJk">
+      </div>
+      <div class="form-group">
+        <label>Título del Video</label>
+        <input type="text" id="vidTitle" placeholder="Ingresa el título para mostrar">
+      </div>
+      <div class="form-group">
+        <label>Duración (Min:Seg)</label>
+        <input type="text" id="vidDuration" placeholder="03:45">
+      </div>
+      
+      <button class="btn" style="width: 100%;" onclick="addVideo()">Agregar a la Playlist</button>
+    </section>
+  </aside>
+
+  <section class="card">
+    <h2 class="card-title">Gestión de la Playlist (<span id="videoCount">0</span>)</h2>
+    <div class="video-list" id="videoList"></div>
+  </section>
+
+</main>
+
+<div id="toast">Cambios guardados con éxito</div>
+
+<script>
+  // ============ 1. CONFIGURACIÓN DE SUPBASE ============
+  const SUPABASE_URL = 'PON_TU_URL_AQUI'; // Ej: https://xyz.supabase.co
+  const SUPABASE_KEY = 'PON_TU_ANON_KEY_AQUI';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let videos = [];
+
+  const listContainer = document.getElementById('videoList');
+  const countLabel = document.getElementById('videoCount');
+  const ytUrlInput = document.getElementById('ytUrl');
+  const ytPreview = document.getElementById('ytPreview');
+  const vidIdInput = document.getElementById('vidId');
+  const vidTitleInput = document.getElementById('vidTitle');
+  const vidDurationInput = document.getElementById('vidDuration');
+
+  // ============ 2. INICIALIZAR Y CARGAR DATOS ============
+  async function initAdmin() {
+    // Textos
+    const { data: settings } = await supabase.from('web_settings').select('*').eq('id', 1).single();
+    if (settings) {
+      document.getElementById('webEyebrow').value = settings.eyebrow;
+      document.getElementById('webTitle').value = settings.title;
+      document.getElementById('webDesc').value = settings.description;
+    }
+    
+    // Lista de Videos
+    const { data: playlist } = await supabase.from('playlist').select('*').order('created_at', { ascending: true });
+    if (playlist) {
+      videos = playlist;
+      renderVideoList();
+    }
+  }
+
+  function extractYouTubeID(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }
+
+  function processYouTubeUrl() {
+    const url = ytUrlInput.value.trim();
+    const videoID = extractYouTubeID(url);
+    if (videoID) {
+      vidIdInput.value = videoID;
+      ytPreview.innerHTML = `<img src="https://img.youtube.com/vi/${videoID}/hqdefault.jpg" alt="Portada de YouTube">`;
+      if(!vidTitleInput.value) vidTitleInput.focus();
+    } else {
+      vidIdInput.value = '';
+      ytPreview.innerHTML = `<span>URL no válida</span>`;
+    }
+  }
+
+  function renderVideoList() {
+    listContainer.innerHTML = '';
+    countLabel.textContent = videos.length;
+
+    videos.forEach((vid, index) => {
+      const article = document.createElement('article');
+      article.className = 'video-item';
+      article.innerHTML = `
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/${vid.id}/hqdefault.jpg" onerror="this.src='https://via.placeholder.com/640x360/1b1b1e/9a9a9e?text=No+Image'">
+        </div>
+        <div class="video-info">
+          <h4>${vid.title}</h4>
+          <p>ID: ${vid.id} • Duración: ${vid.duration}</p>
+        </div>
+        <div class="video-actions">
+          <button class="delete" onclick="deleteVideo('${vid.id}', ${index})">Eliminar BD</button>
+        </div>
+      `;
+      listContainer.appendChild(article);
+    });
+  }
+
+  // ============ 3. OPERACIONES EN LA BASE DE DATOS ============
+  
+  async function addVideo() {
+    const id = vidIdInput.value.trim();
+    const title = vidTitleInput.value.trim();
+    const duration = vidDurationInput.value.trim() || "00:00";
+
+    if (!id || !title) { alert("Por favor ingresa una URL válida de YouTube y un título."); return; }
+
+    const newVideo = { id, title, duration };
+    
+    // Insertar en Supabase
+    const { data, error } = await supabase.from('playlist').insert([newVideo]).select();
+    
+    if (error) {
+      showToast("Error al guardar en Supabase");
+      console.error(error);
+    } else {
+      videos.push(data[0]); // Añade el objeto retornado con su db_id
+      ytUrlInput.value = ''; vidIdInput.value = ''; vidTitleInput.value = ''; vidDurationInput.value = '';
+      ytPreview.innerHTML = `<span>La portada aparecerá aquí</span>`;
+      renderVideoList();
+      showToast("Video insertado en la Base de Datos");
+    }
+  }
+
+  async function deleteVideo(youtubeId, index) {
+    if(confirm("¿Seguro que deseas eliminar este video permanentemente?")) {
+      // Borrar de Supabase
+      const { error } = await supabase.from('playlist').delete().eq('id', youtubeId);
+      if(error) {
+        showToast("Error al eliminar");
+      } else {
+        videos.splice(index, 1);
+        renderVideoList();
+        showToast("Video eliminado de la BD");
+      }
+    }
+  }
+
+  async function saveAllChanges() {
+    const config = {
+      eyebrow: document.getElementById('webEyebrow').value,
+      title: document.getElementById('webTitle').value,
+      description: document.getElementById('webDesc').value,
+    };
+    
+    // Actualizar Textos en Supabase
+    const { error } = await supabase.from('web_settings').update(config).eq('id', 1);
+    
+    if (error) {
+      showToast("Error al actualizar textos");
+    } else {
+      showToast("Textos principales actualizados en vivo");
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  initAdmin();
+</script>
+</body>
+</html>
+
