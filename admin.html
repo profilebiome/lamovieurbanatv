@@ -3,208 +3,263 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Administración - LA MOVIE URBANA</title>
+<title>Panel Admin - LA MOVIE URBANA</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-  /* ================= VARIABLES GLOBALES ================= */
-  :root { --black: #0A0A0B; --surface: #1B1B1E; --surface-2: #232327; --line: rgba(255,255,255,0.08); --white: #F5F5F4; --gray: #9A9A9E; --red: #E4002B; --red-glow: rgba(228,0,43,0.35); }
-
-  /* ================= ESTILOS BASE ================= */
+  :root {
+    --black: #0A0A0B; --surface: #1B1B1E; --surface-2: #232327;
+    --line: rgba(255,255,255,0.08); --white: #F5F5F4;
+    --gray: #9A9A9E; --red: #E4002B; --red-glow: rgba(228,0,43,0.35);
+  }
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Manrope', sans-serif; }
   body { background: var(--black); color: var(--white); display: flex; height: 100vh; overflow: hidden; }
   
-  /* ================= SIDEBAR ================= */
-  aside { width: 260px; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; transition: all 0.3s ease; flex-shrink: 0; }
+  /* SIDEBAR */
+  aside { 
+    width: 260px; background: var(--surface); border-right: 1px solid var(--line); 
+    display: flex; flex-direction: column; transition: all 0.3s ease; flex-shrink: 0;
+  }
   aside.collapsed { width: 0; overflow: hidden; border-right: none; }
   .logo { font-family: 'Oswald', sans-serif; font-size: 1.5rem; padding: 24px; border-bottom: 1px solid var(--line); color: var(--white); text-transform: uppercase; white-space: nowrap; }
   .logo span { color: var(--red); }
-  .nav-menu { padding: 20px 0; display: flex; flex-direction: column; gap: 5px; white-space: nowrap; height: 100%;}
+  .nav-menu { padding: 20px 0; display: flex; flex-direction: column; gap: 5px; white-space: nowrap; }
   .nav-btn { background: none; border: none; color: var(--gray); padding: 15px 24px; text-align: left; font-size: 1rem; cursor: pointer; transition: all 0.3s; font-weight: 600; }
   .nav-btn:hover, .nav-btn.active { background: var(--surface-2); color: var(--red); border-right: 3px solid var(--red); box-shadow: inset 5px 0 15px rgba(228,0,43,0.05); }
 
-  /* ================= ÁREA PRINCIPAL ================= */
+  /* ÁREA PRINCIPAL */
   main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
   .topbar { padding: 20px 40px; background: var(--black); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 20px; }
   .toggle-btn { background: var(--surface-2); border: 1px solid var(--line); color: var(--white); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; }
   .toggle-btn:hover { border-color: var(--red); color: var(--red); }
   .topbar-title { font-family: 'Oswald', sans-serif; font-size: 1.5rem; letter-spacing: 1px; color: var(--gray); }
+  .btn-back { background: var(--surface-2); border: 1px solid var(--line); color: var(--white); padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; margin-left: auto; }
+  .btn-back:hover { border-color: var(--red); color: var(--red); }
 
-  /* ================= CONTENEDOR DE PESTAÑAS ================= */
+  /* CONTENEDOR DE PESTAÑAS */
   .content-area { padding: 40px; overflow-y: auto; flex: 1; }
   .content-wrapper { max-width: 1000px; margin: 0 auto; }
   .section-title { font-family: 'Oswald', sans-serif; font-size: 2rem; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
-  
   .tab-content { display: none; animation: fadeIn 0.3s ease; }
   .tab-content.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ================= FORMULARIOS ================= */
+  /* FORMULARIOS */
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
   .form-group { margin-bottom: 20px; }
-  .form-group label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
-  input[type="text"], input[type="url"], input[type="file"], select { width: 100%; background: var(--black); border: 1px solid var(--line); color: var(--white); padding: 12px 16px; border-radius: 6px; font-size: 1rem; transition: border 0.3s; }
-  input[type="file"]::file-selector-button { background: var(--surface-2); color: var(--white); border: 1px solid var(--line); padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 15px; transition: 0.2s; }
-  input[type="file"]::file-selector-button:hover { background: var(--red); border-color: var(--red); }
-  select { appearance: none; cursor: pointer; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+  input[type="text"], input[type="url"], input[type="email"], input[type="password"], select { 
+    width: 100%; background: var(--black); border: 1px solid var(--line); color: var(--white); padding: 12px 16px; border-radius: 6px; font-size: 1rem; transition: border 0.3s; 
+  }
   input:focus, select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
-  
-  /* ================= BOTONES ================= */
-  .btn { background: var(--red); color: var(--white); border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: inline-block; text-align: center;}
+  .btn { background: var(--red); color: var(--white); border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: inline-block; text-align: center; }
   .btn:hover { background: #ff0033; box-shadow: 0 0 15px var(--red-glow); transform: translateY(-2px); }
   .btn-outline { background: transparent; border: 1px solid var(--line); }
-  .btn-outline:hover { border-color: var(--red); color: var(--red); }
+  .btn-outline:hover { border-color: var(--red); color: var(--red); box-shadow: none; }
   
-  /* ================= GRID DE DISEÑO ================= */
   .creator-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
   @media(max-width: 768px) { .creator-grid { grid-template-columns: 1fr; } }
+  
   .preview-box { background: var(--black); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: relative; height: 100%; min-height: 250px; display: flex; flex-direction: column; justify-content: flex-end; }
   .preview-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.3s ease; }
   .preview-overlay { position: relative; z-index: 2; padding: 20px; background: linear-gradient(to top, rgba(10,10,11,1) 0%, rgba(10,10,11,0) 100%); }
   .preview-title { font-family: 'Oswald', sans-serif; font-size: 1.5rem; text-transform: uppercase; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-
-  /* ================= COMPONENTES ================= */
+  
   .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
   .color-item input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 50px; border-radius: 6px; cursor: pointer; background: none; }
+  
   .yt-link-row { display: flex; gap: 10px; margin-bottom: 10px; }
-  .remove-btn { background: var(--surface-2); color: var(--white); border: 1px solid var(--line); padding: 0 15px; cursor: pointer; border-radius: 6px; transition: all 0.2s;}
+  .remove-btn { background: var(--surface-2); color: var(--white); border: 1px solid var(--line); padding: 0 15px; cursor: pointer; border-radius: 6px; transition: all 0.2s; }
   .remove-btn:hover { background: var(--red); border-color: var(--red); }
+  
   .backup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
   .backup-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 30px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; }
   .backup-card:hover { border-color: var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(-5px); }
   .backup-icon { font-size: 3rem; margin-bottom: 15px; }
   .backup-card h3 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 10px; text-transform: uppercase; }
   .backup-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; }
-  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--red); color: white; padding: 12px 24px; border-radius: 6px; display: none; font-weight: bold; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-  .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-right: 10px; display: inline-block;}
+  
+  .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-right: 10px; display: inline-block; }
   .badge-artista { background: #1f6feb; color: white; }
   .badge-playlist-artista { background: #8957e5; color: white; }
   .badge-mix { background: #238636; color: white; }
   .thumb-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface-2); }
+  
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--red); color: white; padding: 12px 24px; border-radius: 6px; display: none; font-weight: bold; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
 
-<aside id="sidebar">
-  <div class="logo">Panel <span>Admin</span></div>
-  <nav class="nav-menu">
-    <button class="nav-btn active" onclick="switchTab('playlist')">Gestor de Contenido</button>
-    <button class="nav-btn" onclick="switchTab('colors')">Diseño y Colores</button>
-    <button class="nav-btn" onclick="switchTab('backup')">Backup y Sistema</button>
-    
-    <div style="margin-top: auto; padding-bottom: 20px;">
-      <button class="nav-btn" style="width: 100%; border-top: 1px solid var(--line); color: var(--red);" onclick="logoutAdmin()">Cerrar Sesión</button>
-      <button class="nav-btn" style="width: 100%; color: var(--white); background: var(--surface-2);" onclick="window.location.href='index.html'">⬅ Regresar a la Web</button>
+<!-- LOGIN SCREEN (visible si no hay sesión) -->
+<div id="loginScreen" style="position:fixed; inset:0; background:var(--black); display:flex; align-items:center; justify-content:center; z-index:999;">
+  <div class="card" style="width:100%; max-width:400px; text-align:center;">
+    <h3 style="font-family:'Oswald', sans-serif; font-size:1.4rem; text-transform:uppercase; color:var(--gray); margin-bottom:20px;">Acceso Administrativo</h3>
+    <div class="form-group">
+      <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
     </div>
-  </nav>
-</aside>
-
-<main>
-  <div class="topbar">
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-    <div class="topbar-title">LA MOVIE URBANA - DASHBOARD</div>
+    <div class="form-group">
+      <input type="password" id="loginPassword" placeholder="Contraseña" required>
+    </div>
+    <button class="btn" style="width:100%" onclick="signIn()">Ingresar</button>
+    <p id="loginError" style="color:var(--red); margin-top:15px; display:none; font-weight:600;"></p>
+    <p style="margin-top:20px; color:var(--gray); font-size:0.9rem;">¿No tienes cuenta? <a href="#" style="color:var(--red);" onclick="window.open('https://app.supabase.com/project/wxbhotzeyjlhkenzleeu/auth/users','_blank')">Crear usuario en Supabase</a></p>
   </div>
+</div>
 
-  <div class="content-area">
-    <div class="content-wrapper">
-      
-      <section id="playlist" class="tab-content active">
-        <h2 class="section-title">Crear Nuevo Post / Artista</h2>
-        <div class="creator-grid">
-          <div class="card" style="margin-bottom:0;">
-            <div class="form-group"><label>Tipo de Contenido</label><select id="vidType"><option value="artista">Artista Solo</option><option value="playlist-artista">Playlist de Artista</option><option value="mix">Playlist General / Mix</option></select></div>
-            <div class="form-group"><label>Nombre del Artista o Título</label><input type="text" id="vidTitle" placeholder="Ej: Anuel AA o LOS MEJORES DRILLS"></div>
-            <div class="form-group"><label>Foto del Artista (URL)</label><input type="url" id="artistImg" placeholder="Ej: https://i.imgur.com/tuImagen.jpg"></div>
-            <div class="form-group">
-              <label>Links de YouTube</label>
-              <div id="linkContainer">
-                <div class="yt-link-row"><input type="url" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=..."><button class="remove-btn" onclick="this.parentElement.remove()">X</button></div>
+<!-- PANEL PRINCIPAL (oculto hasta login) -->
+<div id="adminPanel" style="display:none; width:100vw; height:100vh; display:flex;">
+  <aside id="sidebar">
+    <div class="logo">Panel <span>Admin</span></div>
+    <nav class="nav-menu">
+      <button class="nav-btn active" onclick="switchTab('playlist')">Gestor de Contenido</button>
+      <button class="nav-btn" onclick="switchTab('colors')">Diseño y Colores</button>
+      <button class="nav-btn" onclick="switchTab('backup')">Backup y Sistema</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">LA MOVIE URBANA - DASHBOARD</div>
+      <a href="index.html" class="btn-back">← Regresar a la Web</a>
+      <button class="btn-outline" onclick="signOut()" style="padding: 8px 20px; font-size:0.85rem;">Cerrar sesión</button>
+    </div>
+
+    <div class="content-area">
+      <div class="content-wrapper">
+        
+        <section id="playlist" class="tab-content active">
+          <h2 class="section-title">Crear Nuevo Post / Artista</h2>
+          <div class="creator-grid">
+            <div class="card" style="margin-bottom:0;">
+              <div class="form-group">
+                <label>Tipo de Contenido</label>
+                <select id="vidType">
+                  <option value="artista">Artista Solo</option>
+                  <option value="playlist-artista">Playlist de Artista</option>
+                  <option value="mix">Playlist General / Mix</option>
+                </select>
               </div>
-              <button class="btn btn-outline" style="margin-top: 10px; width:100%;" onclick="addLinkField()">+ Agregar otro link</button>
+              <div class="form-group">
+                <label>Nombre del Artista o Título</label>
+                <input type="text" id="vidTitle" placeholder="Ej: Anuel AA o LOS MEJORES DRILLS">
+              </div>
+              <div class="form-group">
+                <label>Imagen Thumbnail (URL de Imgur)</label>
+                <input type="url" id="artistImg" placeholder="https://i.imgur.com/tuImagen.jpg">
+              </div>
+              <div class="form-group">
+                <label>Links de YouTube</label>
+                <div id="linkContainer">
+                  <div class="yt-link-row">
+                    <input type="url" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=...">
+                    <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="margin-top:10px; width:100%;" onclick="addLinkField()">+ Agregar otro link</button>
+              </div>
+              <button class="btn" style="width:100%" onclick="savePlaylist()">Guardar Contenido</button>
             </div>
-            <button class="btn" style="width:100%" onclick="savePlaylist()">Guardar Contenido</button>
-          </div>
 
-          <div class="card" style="margin-bottom:0; display:flex; flex-direction:column;">
-            <label style="color:var(--gray); text-transform:uppercase; font-size:0.85rem; font-weight:bold; margin-bottom:10px;">Vista Previa</label>
-            <div class="preview-box">
-              <img id="prevImg" src="https://via.placeholder.com/400x300/1B1B1E/F5F5F4?text=Sube+una+foto" class="preview-img" alt="Previsualización">
-              <div class="preview-overlay"><div id="prevBadge"><span class="badge badge-artista">Artista Solo</span></div><div class="preview-title" id="prevTitle">Nombre del Artista</div></div>
+            <div class="card" style="margin-bottom:0; display:flex; flex-direction:column;">
+              <label style="color:var(--gray); text-transform:uppercase; font-size:0.85rem; font-weight:bold; margin-bottom:10px;">Vista Previa</label>
+              <div class="preview-box">
+                <img id="prevImg" src="https://via.placeholder.com/400x300/1B1B1E/F5F5F4?text=Sube+una+foto" class="preview-img" alt="Previsualización">
+                <div class="preview-overlay">
+                  <div id="prevBadge"><span class="badge badge-artista">Artista Solo</span></div>
+                  <div class="preview-title" id="prevTitle">Nombre del Artista</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <h2 class="section-title" style="margin-top: 40px;">Contenido Actual</h2>
-        <div class="card">
-          <ul id="currentPlaylist" style="list-style: none; display:flex; flex-direction: column; gap: 10px;"></ul>
-          <button class="btn btn-outline" style="margin-top: 20px;" onclick="clearPlaylist()">Borrar Todos</button>
-        </div>
-      </section>
-
-      <section id="colors" class="tab-content">
-        <h2 class="section-title">Editor de Colores Globales</h2>
-        <div class="card color-grid">
-          <div class="color-item"><label>Color Principal (Rojo)</label><input type="color" id="colorRed" value="#E4002B"></div>
-          <div class="color-item"><label>Fondo Base</label><input type="color" id="colorBlack" value="#0A0A0B"></div>
-          <div class="color-item"><label>Superficies (Tarjetas)</label><input type="color" id="colorSurface" value="#1B1B1E"></div>
-          <div class="color-item"><label>Texto Primario</label><input type="color" id="colorText" value="#F5F5F4"></div>
-        </div>
-        <button class="btn" onclick="saveColors()">Aplicar Colores a la Web</button>
-      </section>
-
-      <section id="backup" class="tab-content">
-        <h2 class="section-title">Centro de Backups</h2>
-        <div class="backup-grid">
-          <div class="backup-card">
-            <div class="backup-icon">📥</div><h3>Exportar Datos</h3><p>Descarga un archivo JSON con todo el contenido de Supabase.</p>
-            <button class="btn" style="width:100%" onclick="exportBackup()">Descargar Backup</button>
+          <h2 class="section-title" style="margin-top:40px;">Contenido Actual</h2>
+          <div class="card">
+            <ul id="currentPlaylist" style="list-style: none; display:flex; flex-direction: column; gap: 10px;"></ul>
+            <button class="btn btn-outline" style="margin-top:20px;" onclick="clearPlaylist()">Borrar Todos</button>
           </div>
-          <div class="backup-card">
-            <div class="backup-icon">📤</div><h3>Restaurar Datos</h3><p>Sube un archivo JSON para sobrescribir la base de datos de Supabase.</p>
-            <input type="file" id="backupFileInput" accept=".json" style="margin-bottom:15px; width:100%;">
-            <button class="btn btn-outline" style="width:100%" onclick="importBackup()">Restaurar Backup</button>
+        </section>
+
+        <section id="colors" class="tab-content">
+          <h2 class="section-title">Editor de Colores Globales</h2>
+          <div class="card color-grid">
+            <div class="color-item"><label>Color Principal (Rojo)</label><input type="color" id="colorRed" value="#E4002B"></div>
+            <div class="color-item"><label>Fondo Base</label><input type="color" id="colorBlack" value="#0A0A0B"></div>
+            <div class="color-item"><label>Superficies (Tarjetas)</label><input type="color" id="colorSurface" value="#1B1B1E"></div>
+            <div class="color-item"><label>Texto Primario</label><input type="color" id="colorText" value="#F5F5F4"></div>
           </div>
-        </div>
-      </section>
-      
+          <button class="btn" onclick="saveColors()">Aplicar Colores a la Web</button>
+        </section>
+
+        <section id="backup" class="tab-content">
+          <h2 class="section-title">Centro de Backups</h2>
+          <div class="backup-grid">
+            <div class="backup-card">
+              <div class="backup-icon">📥</div>
+              <h3>Exportar Datos</h3>
+              <p>Descarga un archivo JSON con todo el contenido actual y configuraciones.</p>
+              <button class="btn" style="width:100%" onclick="exportBackup()">Descargar Backup</button>
+            </div>
+            <div class="backup-card">
+              <div class="backup-icon">📤</div>
+              <h3>Restaurar Datos</h3>
+              <p>Sube un archivo JSON de respaldo previo para sobrescribir todo.</p>
+              <input type="file" id="backupFileInput" accept=".json" style="margin-bottom:15px; width:100%;">
+              <button class="btn btn-outline" style="width:100%" onclick="importBackup()">Restaurar Backup</button>
+            </div>
+          </div>
+        </section>
+        
+      </div>
     </div>
-  </div>
-</main>
+  </main>
+</div>
 
-<div class="toast" id="toastMsg">Acción exitosa</div>
+<div class="toast" id="toastMsg">Guardado con éxito</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ============ CONFIGURACIÓN SUPABASE ============
   const supabaseUrl = 'https://wxbhotzeyjlhkenzleeu.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4YmhvdHpleWpsaGtlbnpsZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzIyNjAsImV4cCI6MjA5ODEwODI2MH0.VpogiqtNt0pJxo2uhCtMvH7jLnjTaPltZjlHvl9IoxE';
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // ============ PROTECCIÓN DE RUTAS DE SESIÓN ============
+  // ============ MANEJO DE SESIÓN ============
   window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Validar que la persona esté logueada con Supabase Auth.
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
-    // Si no hay sesión iniciada lo retornamos a la página principal
-    if (!session || error) {
-      window.location.href = 'index.html'; 
-      return; 
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      showAdminPanel();
+    } else {
+      showLogin();
     }
+  });
 
-    // 2. Cargar UI solamente si es usuario verificado
+  function showLogin() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+  function showAdminPanel() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'flex';
     loadPlaylistUI();
     loadColorsUI();
     updatePreview();
-    
-    document.getElementById('vidTitle').addEventListener('input', updatePreview);
-    document.getElementById('artistImg').addEventListener('input', updatePreview);
-    document.getElementById('vidType').addEventListener('change', updatePreview);
-  });
+  }
 
-  // Cierre de Sesión Oficial
-  async function logoutAdmin() {
+  async function signIn() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginError').innerText = error.message;
+    } else {
+      showAdminPanel();
+    }
+  }
+
+  async function signOut() {
     await supabase.auth.signOut();
-    window.location.href = 'index.html';
+    showLogin();
   }
 
   // ============ UTILIDADES ============
@@ -217,24 +272,31 @@
   }
   function showToast(msg) {
     const t = document.getElementById('toastMsg');
-    t.innerText = msg; t.style.display = 'block';
+    t.innerText = msg;
+    t.style.display = 'block';
     setTimeout(() => t.style.display = 'none', 3000);
-  }
-  function getBadgeHTML(type) {
-    if (type === 'artista') return `<span class="badge badge-artista">Artista Solo</span>`;
-    if (type === 'playlist-artista') return `<span class="badge badge-playlist-artista">Playlist Artista</span>`;
-    return `<span class="badge badge-mix">Mix General</span>`;
   }
 
   // ============ VISTA PREVIA ============
   function updatePreview() {
     const title = document.getElementById('vidTitle').value || 'Nombre del Artista';
     const imgUrl = document.getElementById('artistImg').value || 'https://via.placeholder.com/400x300/1B1B1E/F5F5F4?text=Sube+una+foto';
+    const type = document.getElementById('vidType').value;
     document.getElementById('prevTitle').innerText = title;
     document.getElementById('prevImg').src = imgUrl;
-    document.getElementById('prevBadge').innerHTML = getBadgeHTML(document.getElementById('vidType').value);
+    document.getElementById('prevBadge').innerHTML = getBadgeHTML(type);
+  }
+  document.getElementById('vidTitle').addEventListener('input', updatePreview);
+  document.getElementById('artistImg').addEventListener('input', updatePreview);
+  document.getElementById('vidType').addEventListener('change', updatePreview);
+
+  function getBadgeHTML(type) {
+    if (type === 'artista') return '<span class="badge badge-artista">Artista Solo</span>';
+    if (type === 'playlist-artista') return '<span class="badge badge-playlist-artista">Playlist Artista</span>';
+    return '<span class="badge badge-mix">Mix General</span>';
   }
 
+  // ============ GESTIÓN DE VIDEOS ============
   function addLinkField() {
     const container = document.getElementById('linkContainer');
     const div = document.createElement('div');
@@ -242,143 +304,140 @@
     div.innerHTML = `<input type="url" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=..."><button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
     container.appendChild(div);
   }
-  function extractYouTubeID(url) {
-    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-    return (match && match[2].length === 11) ? match[2] : null;
-  }
 
-  // ============ OPERACIONES CRUD SUPABASE ============
   async function savePlaylist() {
     const title = document.getElementById('vidTitle').value || 'Sin Título';
     const type = document.getElementById('vidType').value;
     const img = document.getElementById('artistImg').value;
     const inputs = document.querySelectorAll('.yt-url-input');
-    
-    let toInsert = [];
-    inputs.forEach(input => {
-      const ytID = extractYouTubeID(input.value);
-      if (ytID) toInsert.push({ youtube_id: ytID, title, type, img });
-    });
-
-    if (toInsert.length > 0) {
-      const { error } = await supabase.from('videos').insert(toInsert);
-      if (error) { alert("Error al guardar: " + error.message); return; }
-      
-      showToast(`${toInsert.length} registro(s) guardado(s)`);
+    let addedCount = 0;
+    for (const input of inputs) {
+      const url = input.value.trim();
+      if (!url) continue;
+      const { error } = await supabase.from('proyectos').insert([
+        { titulo: title, tipo: type, media_url: img, enlace_externo: url }
+      ]);
+      if (!error) addedCount++;
+    }
+    if (addedCount > 0) {
+      showToast(`${addedCount} registro(s) guardado(s)`);
       document.getElementById('vidTitle').value = '';
       document.getElementById('artistImg').value = '';
       inputs.forEach(i => i.value = '');
       updatePreview();
       loadPlaylistUI();
     } else {
-      alert("Inserta links válidos de YouTube.");
+      alert("Inserta al menos un link válido de YouTube.");
     }
   }
 
   async function loadPlaylistUI() {
+    const { data, error } = await supabase.from('proyectos').select('*').order('fecha_creacion', { ascending: true });
+    if (error) return console.error(error);
     const list = document.getElementById('currentPlaylist');
-    list.innerHTML = 'Cargando...';
-    
-    const { data: videos, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
-    if (error) { list.innerHTML = 'Error cargando datos.'; return; }
-    
     list.innerHTML = '';
-    videos.forEach(v => {
-      const safeImg = v.img ? v.img : 'https://via.placeholder.com/40/1B1B1E/F5F5F4?text=X';
+    data.forEach(proy => {
+      const safeImg = proy.media_url || 'https://via.placeholder.com/40/1B1B1E/F5F5F4?text=X';
       const li = document.createElement('li');
       li.style.cssText = "background:var(--surface-2); padding:10px 15px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); flex-wrap: wrap; gap: 10px;";
       li.innerHTML = `
-        <div style="display:flex; align-items:center; gap: 15px;">
+        <div style="display:flex; align-items:center; gap:15px;">
           <img src="${safeImg}" class="thumb-img" alt="thumb">
           <div>
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-family:'Oswald'; font-size:1.1rem;">${v.title}</span>
-              ${getBadgeHTML(v.type)}
+              <span style="font-family:'Oswald'; font-size:1.1rem;">${proy.titulo}</span>
+              ${getBadgeHTML(proy.tipo || 'mix')}
             </div>
-            <small style="color:var(--gray);">YouTube ID: ${v.youtube_id}</small>
+            <small style="color:var(--gray);">URL: ${proy.enlace_externo}</small>
           </div>
         </div>
-        <button class="remove-btn" style="padding:8px 15px" onclick="removeVideo('${v.id}')">Eliminar</button>
+        <button class="remove-btn" style="padding:8px 15px" onclick="removeVideo('${proy.id}')">Eliminar</button>
       `;
       list.appendChild(li);
     });
   }
 
   async function removeVideo(id) {
-    const { error } = await supabase.from('videos').delete().eq('id', id);
-    if (!error) loadPlaylistUI();
+    await supabase.from('proyectos').delete().eq('id', id);
+    loadPlaylistUI();
   }
 
   async function clearPlaylist() {
-    if(confirm("¿Estás seguro que deseas borrar todo el contenido en Supabase?")) {
-      const { error } = await supabase.from('videos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      if (!error) { showToast("Contenido vaciado"); loadPlaylistUI(); }
+    if(confirm("¿Estás seguro de borrar TODO el contenido?")) {
+      const { error } = await supabase.from('proyectos').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // truco para borrar todos
+      if (!error) {
+        loadPlaylistUI();
+        showToast("Contenido vaciado");
+      }
     }
   }
 
-  // ============ COLORES SUPABASE ============
+  // ============ COLORES ============
   async function loadColorsUI() {
-    const { data: colors } = await supabase.from('colors').select('*').eq('id', 1).single();
-    if (colors) {
-      document.getElementById('colorRed').value = colors.red;
-      document.getElementById('colorBlack').value = colors.black;
-      document.getElementById('colorSurface').value = colors.surface;
-      document.getElementById('colorText').value = colors.text_color;
+    const { data, error } = await supabase.from('config').select('colores').single();
+    if (data && data.colores) {
+      document.getElementById('colorRed').value = data.colores.red;
+      document.getElementById('colorBlack').value = data.colores.black;
+      document.getElementById('colorSurface').value = data.colores.surface;
+      document.getElementById('colorText').value = data.colores.text;
     }
   }
 
   async function saveColors() {
-    const updates = {
-      id: 1,
+    const colores = {
       red: document.getElementById('colorRed').value,
       black: document.getElementById('colorBlack').value,
       surface: document.getElementById('colorSurface').value,
-      text_color: document.getElementById('colorText').value
+      text: document.getElementById('colorText').value
     };
-    const { error } = await supabase.from('colors').upsert(updates);
-    if (!error) showToast("Colores actualizados en la nube.");
+    const { error } = await supabase.from('config').update({ colores }).eq('id', 1);
+    if (!error) showToast("Colores actualizados correctamente");
   }
 
-  // ============ BACKUP SUPABASE ============
+  // ============ BACKUP ============
   async function exportBackup() {
-    const { data: videos } = await supabase.from('videos').select('*');
-    const { data: colors } = await supabase.from('colors').select('*').eq('id', 1).single();
-    
-    const data = { videos: videos || [], colors: colors || null };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const { data: proyectos } = await supabase.from('proyectos').select('*');
+    const { data: config } = await supabase.from('config').select('colores').single();
+    const backup = { proyectos, colores: config?.colores || null };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
     const a = document.createElement('a');
-    a.href = dataStr; a.download = "lamovie_supabase_backup.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    showToast("Backup exportado correctamente");
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", "lamovie_backup.json");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast("Backup exportado");
   }
 
   async function importBackup() {
     const fileInput = document.getElementById('backupFileInput');
-    if (!fileInput.files.length) { alert("Selecciona un archivo JSON primero."); return; }
-
+    if (!fileInput.files.length) return alert("Selecciona un archivo JSON.");
+    const file = fileInput.files[0];
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async (e) => {
       try {
-        const data = JSON.parse(e.target.result);
-        if (data.videos && data.videos.length > 0) {
-          await clearPlaylist(); 
-          const toInsert = data.videos.map(v => ({ youtube_id: v.youtube_id, title: v.title, type: v.type, img: v.img }));
-          await supabase.from('videos').insert(toInsert);
+        const backup = JSON.parse(e.target.result);
+        // Limpiar proyectos actuales
+        await supabase.from('proyectos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // Insertar los nuevos
+        if (backup.proyectos && backup.proyectos.length) {
+          const inserts = backup.proyectos.map(p => ({
+            titulo: p.titulo, tipo: p.tipo, media_url: p.media_url, enlace_externo: p.enlace_externo
+          }));
+          await supabase.from('proyectos').insert(inserts);
         }
-        if (data.colors) {
-          const c = data.colors;
-          await supabase.from('colors').upsert({ id: 1, red: c.red, black: c.black, surface: c.surface, text_color: c.text_color || c.text });
+        // Actualizar colores
+        if (backup.colores) {
+          await supabase.from('config').update({ colores: backup.colores }).eq('id', 1);
         }
-        
         loadPlaylistUI();
         loadColorsUI();
-        showToast("Backup restaurado en Supabase");
-        fileInput.value = "";
+        showToast("Backup restaurado con éxito");
       } catch (err) {
-        alert("Error restaurando base de datos: " + err.message);
+        alert("Archivo inválido o corrupto.");
       }
     };
-    reader.readAsText(fileInput.files[0]);
+    reader.readAsText(file);
   }
 </script>
 </body>
