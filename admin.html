@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de Administración - LA MOVIE URBANA</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -93,9 +92,10 @@
     <button class="nav-btn active" onclick="switchTab('playlist')">Gestor de Contenido</button>
     <button class="nav-btn" onclick="switchTab('colors')">Diseño y Colores</button>
     <button class="nav-btn" onclick="switchTab('backup')">Backup y Sistema</button>
-    <!-- Botón para regresar a la web -->
+    
     <div style="margin-top: auto; padding-bottom: 20px;">
-      <button class="nav-btn" style="width: 100%; border-top: 1px solid var(--line); color: var(--white); background: var(--surface-2);" onclick="window.location.href='index.html'">⬅ Regresar a la Web</button>
+      <button class="nav-btn" style="width: 100%; border-top: 1px solid var(--line); color: var(--red);" onclick="logoutAdmin()">Cerrar Sesión</button>
+      <button class="nav-btn" style="width: 100%; color: var(--white); background: var(--surface-2);" onclick="window.location.href='index.html'">⬅ Regresar a la Web</button>
     </div>
   </nav>
 </aside>
@@ -109,7 +109,6 @@
   <div class="content-area">
     <div class="content-wrapper">
       
-      <!-- CONTENIDO -->
       <section id="playlist" class="tab-content active">
         <h2 class="section-title">Crear Nuevo Post / Artista</h2>
         <div class="creator-grid">
@@ -143,7 +142,6 @@
         </div>
       </section>
 
-      <!-- COLORES -->
       <section id="colors" class="tab-content">
         <h2 class="section-title">Editor de Colores Globales</h2>
         <div class="card color-grid">
@@ -155,7 +153,6 @@
         <button class="btn" onclick="saveColors()">Aplicar Colores a la Web</button>
       </section>
 
-      <!-- BACKUP -->
       <section id="backup" class="tab-content">
         <h2 class="section-title">Centro de Backups</h2>
         <div class="backup-grid">
@@ -183,7 +180,18 @@
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4YmhvdHpleWpsaGtlbnpsZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzIyNjAsImV4cCI6MjA5ODEwODI2MH0.VpogiqtNt0pJxo2uhCtMvH7jLnjTaPltZjlHvl9IoxE';
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  window.onload = () => {
+  // ============ PROTECCIÓN DE RUTAS DE SESIÓN ============
+  window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Validar que la persona esté logueada con Supabase Auth.
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    // Si no hay sesión iniciada lo retornamos a la página principal
+    if (!session || error) {
+      window.location.href = 'index.html'; 
+      return; 
+    }
+
+    // 2. Cargar UI solamente si es usuario verificado
     loadPlaylistUI();
     loadColorsUI();
     updatePreview();
@@ -191,7 +199,13 @@
     document.getElementById('vidTitle').addEventListener('input', updatePreview);
     document.getElementById('artistImg').addEventListener('input', updatePreview);
     document.getElementById('vidType').addEventListener('change', updatePreview);
-  };
+  });
+
+  // Cierre de Sesión Oficial
+  async function logoutAdmin() {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  }
 
   // ============ UTILIDADES ============
   function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
@@ -297,7 +311,6 @@
 
   async function clearPlaylist() {
     if(confirm("¿Estás seguro que deseas borrar todo el contenido en Supabase?")) {
-      // Elimina registros donde id no sea nulo (todo)
       const { error } = await supabase.from('videos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       if (!error) { showToast("Contenido vaciado"); loadPlaylistUI(); }
     }
@@ -347,10 +360,7 @@
     reader.onload = async function(e) {
       try {
         const data = JSON.parse(e.target.result);
-        
         if (data.videos && data.videos.length > 0) {
-          // Limpiamos los Ids autogenerados para forzar la creación de nuevos o mantenemos los originales.
-          // Optamos por insertar la lista sin duplicados si limpiamos primero.
           await clearPlaylist(); 
           const toInsert = data.videos.map(v => ({ youtube_id: v.youtube_id, title: v.title, type: v.type, img: v.img }));
           await supabase.from('videos').insert(toInsert);
