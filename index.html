@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -207,10 +206,10 @@
   <div class="login-box">
     <h3>Acceso a Panel</h3>
     <form id="loginForm">
-      <input type="text" id="adminUser" placeholder="Usuario" required>
+      <input type="email" id="adminUser" placeholder="Correo Electrónico" required>
       <input type="password" id="adminPass" placeholder="Contraseña" required>
       <button type="submit" class="btn-login">Ingresar</button>
-      <p id="loginError" style="color:var(--red); display:none; margin-top:15px; font-size:0.85rem; font-weight:600;">Credenciales incorrectas.</p>
+      <p id="loginError" style="color:var(--red); display:none; margin-top:15px; font-size:0.85rem; font-weight:600;">Credenciales incorrectas o usuario no registrado.</p>
     </form>
   </div>
 </section>
@@ -239,7 +238,6 @@
 
   // ============ RENDERIZADO DE TARJETAS ============
   function cardHTML(vid, i){
-    // Utiliza el youtube_id si viene de supabase o id si es local
     const ytID = vid.youtube_id || vid.id; 
     const thumbUrl = vid.img && vid.img.trim() !== '' ? vid.img : `https://img.youtube.com/vi/${ytID}/maxresdefault.jpg`;
     const duration = vid.duration || "EN VIVO";
@@ -276,7 +274,6 @@
 
   // ============ CARGA ASÍNCRONA DESDE SUPABASE ============
   async function loadData() {
-    // 1. Cargar colores
     const { data: colors } = await supabase.from('colors').select('*').eq('id', 1).single();
     if (colors) {
       document.documentElement.style.setProperty('--red', colors.red);
@@ -285,13 +282,11 @@
       document.documentElement.style.setProperty('--white', colors.text_color);
     }
 
-    // 2. Cargar videos
     const { data: vids, error } = await supabase.from('videos').select('*').order('created_at', { ascending: true });
     
     if (vids && vids.length > 0) {
       videos = vids;
     } else {
-      // Fallback por defecto si la BD está vacía
       videos = [
         { id: "1_zgKRBrT0Y", youtube_id: "1_zgKRBrT0Y", title: "ANUEL AA - EL NENE", type: "artista", img:"" },
         { id: "P2QzHtzKj-U", youtube_id: "P2QzHtzKj-U", title: "BAD BUNNY - MONACO", type: "mix", img:"" }
@@ -300,7 +295,6 @@
     renderUI();
   }
 
-  // Iniciar la carga de datos
   loadData();
 
   // ============ NAVEGACIÓN Y SCROLL ============
@@ -335,14 +329,14 @@
   track.addEventListener('scroll', () => requestAnimationFrame(updateScrollUI));
   window.addEventListener('resize', updateScrollUI);
 
-  // ============ LÓGICA DE ARRASTRE (DRAG) ============
+  // ============ LÓGICA DE ARRASTRE ============
   let isDown = false, startX, scrollStart;
   track.addEventListener('mousedown', e => { isDown = true; track.classList.add('dragging'); startX = e.pageX; scrollStart = track.scrollLeft; });
   window.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
   window.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('dragging'); });
   track.addEventListener('mousemove', e => { if(!isDown) return; e.preventDefault(); track.scrollLeft = scrollStart - (e.pageX - startX); });
 
-  // ============ REPRODUCTOR (MODAL) ============
+  // ============ REPRODUCTOR MODAL ============
   const modal = document.getElementById('videoModal');
   const player = document.getElementById('player');
 
@@ -366,15 +360,33 @@
   modal.addEventListener('click', e => { if(e.target === modal) closeVideo(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeVideo(); });
 
-  // ============ LÓGICA LOGIN ADMIN ============
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const user = document.getElementById('adminUser').value;
-    const pass = document.getElementById('adminPass').value;
-    if (user === 'admin' && pass === 'lamovie123') {
+  // ============ AUTENTICACIÓN OFICIAL SUPABASE ============
+  // Comprueba si el usuario ya está logueado al cargar para redirigir automáticamente
+  window.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
       window.location.href = 'admin.html';
+    }
+  });
+
+  // Listener para el login oficial
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+    
+    // Método oficial de Auth de Supabase (reemplaza las credenciales hardcodeadas)
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: pass
+    });
+
+    if (error) {
+      const errorEl = document.getElementById('loginError');
+      errorEl.innerText = "Error: " + error.message; 
+      errorEl.style.display = 'block';
     } else {
-      document.getElementById('loginError').style.display = 'block';
+      window.location.href = 'admin.html';
     }
   });
 </script>
