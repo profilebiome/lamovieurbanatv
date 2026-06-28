@@ -2,153 +2,297 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Admin Panel - LA MOVIE URBANA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración - LA MOVIE URBANA</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
+  /* ================= VARIABLES GLOBALES ================= */
   :root {
-    --bg-dark: #0A0A0B; --panel-bg: #1B1B1E;
-    --border: rgba(255,255,255,0.08);
-    --text-main: #F5F5F4; --text-muted: #9A9A9E;
-    --accent: #E4002B; --accent-hover: #9E0020;
-    --success: #10B981; --danger: #EF4444;
+    --black: #0A0A0B; --surface: #1B1B1E; --surface-2: #232327;
+    --line: rgba(255,255,255,0.08); --white: #F5F5F4;
+    --gray: #9A9A9E; --red: #E4002B; --red-glow: rgba(228,0,43,0.35);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Manrope', system-ui, sans-serif; line-height: 1.5; padding: 20px; }
-  .admin-layout { display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
-  @media (min-width: 992px) { .admin-layout { grid-template-columns: 350px 1fr; } }
-  header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-  h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
-  header h1 { font-size: 2rem; letter-spacing: 1px; }
-  header h1 span { color: var(--accent); }
-  .card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: box-shadow 0.3s ease; }
-  .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-  .card-title { font-size: 1.2rem; margin-bottom: 20px; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-  .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
-  input, textarea { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 8px; font-family: inherit; transition: border-color 0.3s ease; }
-  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--accent); color: var(--text-main); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; font-family: inherit; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
-  .btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
-  .btn-outline { background: transparent; border: 1px solid var(--border); }
-  .btn-outline:hover { background: var(--bg-dark); border-color: var(--accent); }
-  .btn-danger { background: var(--danger); }
-  .btn-danger:hover { background: #b91c1c; }
-  .yt-preview { width: 100%; aspect-ratio: 16/9; background: var(--bg-dark); border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-  .yt-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .yt-preview span { color: var(--text-muted); font-size: 0.85rem; }
-  .video-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
-  .video-item { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-  .video-thumb { aspect-ratio: 16/9; background: #000; position: relative; }
-  .video-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-  .video-info { padding: 16px; flex-grow: 1; }
-  .video-info h4 { font-size: 1rem; margin-bottom: 4px; }
-  .video-info p { font-size: 0.8rem; color: var(--text-muted); }
-  .video-actions { display: flex; border-top: 1px solid var(--border); }
-  .video-actions button { flex: 1; padding: 10px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; }
-  .video-actions button:hover { background: var(--panel-bg); color: var(--text-main); }
-  .video-actions .delete:hover { color: var(--danger); }
-  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: #fff; padding: 12px 24px; border-radius: 8px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; }
-  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ================= ESTILOS BASE ================= */
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Manrope', sans-serif; }
+  body { background: var(--black); color: var(--white); display: flex; height: 100vh; overflow: hidden; }
+  
+  /* ================= SIDEBAR ================= */
+  aside { 
+    width: 260px; 
+    background: var(--surface); 
+    border-right: 1px solid var(--line); 
+    display: flex; 
+    flex-direction: column; 
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  aside.collapsed { width: 0; overflow: hidden; border-right: none; }
+  .logo { font-family: 'Oswald', sans-serif; font-size: 1.5rem; padding: 24px; border-bottom: 1px solid var(--line); color: var(--white); text-transform: uppercase; white-space: nowrap; }
+  .logo span { color: var(--red); }
+  .nav-menu { padding: 20px 0; display: flex; flex-direction: column; gap: 5px; white-space: nowrap; }
+  .nav-btn { background: none; border: none; color: var(--gray); padding: 15px 24px; text-align: left; font-size: 1rem; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+  .nav-btn:hover, .nav-btn.active { background: var(--surface-2); color: var(--red); border-right: 3px solid var(--red); box-shadow: inset 5px 0 15px rgba(228,0,43,0.05); }
+
+  /* ================= ÁREA PRINCIPAL ================= */
+  main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .topbar { padding: 20px 40px; background: var(--black); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 20px; }
+  .toggle-btn { background: var(--surface-2); border: 1px solid var(--line); color: var(--white); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; }
+  .toggle-btn:hover { border-color: var(--red); color: var(--red); }
+  .topbar-title { font-family: 'Oswald', sans-serif; font-size: 1.5rem; letter-spacing: 1px; color: var(--gray); }
+
+  /* ================= CONTENEDOR DE PESTAÑAS ================= */
+  .content-area { padding: 40px; overflow-y: auto; flex: 1; }
+  .content-wrapper { max-width: 1000px; margin: 0 auto; }
+  .section-title { font-family: 'Oswald', sans-serif; font-size: 2rem; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ================= FORMULARIOS Y TARJETAS ================= */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
+  
+  input[type="text"], input[type="url"], input[type="file"], select { 
+    width: 100%; background: var(--black); border: 1px solid var(--line); color: var(--white); padding: 12px 16px; border-radius: 6px; font-size: 1rem; transition: border 0.3s; 
+  }
+  input[type="file"]::file-selector-button {
+    background: var(--surface-2); color: var(--white); border: 1px solid var(--line); padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 15px; transition: 0.2s;
+  }
+  input[type="file"]::file-selector-button:hover { background: var(--red); border-color: var(--red); }
+  select { appearance: none; cursor: pointer; }
+  input:focus, select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+  
+  /* ================= BOTONES ================= */
+  .btn { background: var(--red); color: var(--white); border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: inline-block; text-align: center;}
+  .btn:hover { background: #ff0033; box-shadow: 0 0 15px var(--red-glow); transform: translateY(-2px); }
+  .btn-outline { background: transparent; border: 1px solid var(--line); }
+  .btn-outline:hover { border-color: var(--red); color: var(--red); box-shadow: none; }
+  
+  /* ================= GRID DE DISEÑO ================= */
+  /* Split layout para Formulario y Vista Previa */
+  .creator-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
+  @media(max-width: 768px) { .creator-grid { grid-template-columns: 1fr; } }
+  
+  /* Vista Previa */
+  .preview-box { background: var(--black); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: relative; height: 100%; min-height: 250px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .preview-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.3s ease; }
+  .preview-overlay { position: relative; z-index: 2; padding: 20px; background: linear-gradient(to top, rgba(10,10,11,1) 0%, rgba(10,10,11,0) 100%); }
+  .preview-title { font-family: 'Oswald', sans-serif; font-size: 1.5rem; text-transform: uppercase; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+  /* ================= COLORES ================= */
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+  .color-item input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 50px; border-radius: 6px; cursor: pointer; background: none; }
+  
+  /* ================= ENLACES YT DINÁMICOS ================= */
+  .yt-link-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .remove-btn { background: var(--surface-2); color: var(--white); border: 1px solid var(--line); padding: 0 15px; cursor: pointer; border-radius: 6px; transition: all 0.2s;}
+  .remove-btn:hover { background: var(--red); border-color: var(--red); }
+
+  /* ================= BACKUP Y SISTEMA REDISEÑADO ================= */
+  .backup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .backup-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 30px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .backup-card:hover { border-color: var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(-5px); }
+  .backup-icon { font-size: 3rem; margin-bottom: 15px; }
+  .backup-card h3 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 10px; text-transform: uppercase; }
+  .backup-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; }
+
+  /* ================= COMPONENTES EXTRA ================= */
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--red); color: white; padding: 12px 24px; border-radius: 6px; display: none; font-weight: bold; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+  .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-right: 10px; display: inline-block;}
+  .badge-artista { background: #1f6feb; color: white; }
+  .badge-playlist-artista { background: #8957e5; color: white; }
+  .badge-mix { background: #238636; color: white; }
+  
+  /* Imagen circular pequeña para la lista actual */
+  .thumb-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface-2); }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Admin <span>Panel</span></h1>
-  <button class="btn btn-outline" onclick="saveAllChanges()">Guardar Textos en la Web</button>
-</header>
+<aside id="sidebar">
+  <div class="logo">Panel <span>Admin</span></div>
+  <nav class="nav-menu">
+    <button class="nav-btn active" onclick="switchTab('playlist')">Gestor de Contenido</button>
+    <button class="nav-btn" onclick="switchTab('colors')">Diseño y Colores</button>
+    <button class="nav-btn" onclick="switchTab('backup')">Backup y Sistema</button>
+  </nav>
+</aside>
 
-<main class="admin-layout">
-  
-  <aside>
-    <section class="card" style="margin-bottom: 24px;">
-      <h2 class="card-title">Textos Principales</h2>
-      <div class="form-group">
-        <label>Etiqueta Superior (Eyebrow)</label>
-        <input type="text" id="webEyebrow" placeholder="Cargando...">
-      </div>
-      <div class="form-group">
-        <label>Título Principal (Usa &lt;br&gt; y &lt;em&gt;)</label>
-        <input type="text" id="webTitle" placeholder="Cargando...">
-      </div>
-      <div class="form-group">
-        <label>Descripción</label>
-        <textarea id="webDesc" rows="3" placeholder="Cargando..."></textarea>
-      </div>
-    </section>
+<main>
+  <div class="topbar">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title">LA MOVIE URBANA - DASHBOARD</div>
+  </div>
 
-    <section class="card">
-      <h2 class="card-title">Agregar Nuevo Video</h2>
-      <div class="form-group">
-        <label>Enlace de YouTube (URL)</label>
-        <input type="url" id="ytUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="processYouTubeUrl()">
-      </div>
+  <div class="content-area">
+    <div class="content-wrapper">
       
-      <div class="yt-preview" id="ytPreview">
-        <span>La portada aparecerá aquí</span>
-      </div>
+      <section id="playlist" class="tab-content active">
+        <h2 class="section-title">Crear Nuevo Post / Artista</h2>
+        
+        <div class="creator-grid">
+          <div class="card" style="margin-bottom:0;">
+            <div class="form-group">
+              <label>Tipo de Contenido</label>
+              <select id="vidType">
+                <option value="artista">Artista Solo</option>
+                <option value="playlist-artista">Playlist de Artista</option>
+                <option value="mix">Playlist General / Mix</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nombre del Artista o Título</label>
+              <input type="text" id="vidTitle" placeholder="Ej: Anuel AA o LOS MEJORES DRILLS">
+            </div>
+            <div class="form-group">
+              <label>Foto del Artista (URL de Imgur u otra)</label>
+              <input type="url" id="artistImg" placeholder="Ej: https://i.imgur.com/tuImagen.jpg">
+            </div>
+            <div class="form-group">
+              <label>Links de YouTube (Se extraerá el ID automático)</label>
+              <div id="linkContainer">
+                <div class="yt-link-row">
+                  <input type="url" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=...">
+                  <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
+                </div>
+              </div>
+              <button class="btn btn-outline" style="margin-top: 10px; width:100%;" onclick="addLinkField()">+ Agregar otro link</button>
+            </div>
+            <button class="btn" style="width:100%" onclick="savePlaylist()">Guardar Contenido</button>
+          </div>
 
-      <div class="form-group" style="margin-top: 16px;">
-        <label>ID del Video (Automático)</label>
-        <input type="text" id="vidId" readonly placeholder="Ej: aBcDeFgHiJk">
-      </div>
-      <div class="form-group">
-        <label>Título del Video</label>
-        <input type="text" id="vidTitle" placeholder="Ingresa el título para mostrar">
-      </div>
-      <div class="form-group">
-        <label>Duración (Min:Seg)</label>
-        <input type="text" id="vidDuration" placeholder="03:45">
-      </div>
+          <div class="card" style="margin-bottom:0; display:flex; flex-direction:column;">
+            <label style="color:var(--gray); text-transform:uppercase; font-size:0.85rem; font-weight:bold; margin-bottom:10px;">Vista Previa</label>
+            <div class="preview-box">
+              <img id="prevImg" src="https://via.placeholder.com/400x300/1B1B1E/F5F5F4?text=Sube+una+foto" class="preview-img" alt="Previsualización">
+              <div class="preview-overlay">
+                <div id="prevBadge">
+                  <span class="badge badge-artista">Artista Solo</span>
+                </div>
+                <div class="preview-title" id="prevTitle">Nombre del Artista</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 40px;">Contenido Actual</h2>
+        <div class="card">
+          <ul id="currentPlaylist" style="list-style: none; display:flex; flex-direction: column; gap: 10px;"></ul>
+          <button class="btn btn-outline" style="margin-top: 20px;" onclick="clearPlaylist()">Borrar Todos</button>
+        </div>
+      </section>
+
+      <section id="colors" class="tab-content">
+        <h2 class="section-title">Editor de Colores Globales</h2>
+        <div class="card color-grid">
+          <div class="color-item">
+            <label>Color Principal (Rojo)</label>
+            <input type="color" id="colorRed" value="#E4002B">
+          </div>
+          <div class="color-item">
+            <label>Fondo Base</label>
+            <input type="color" id="colorBlack" value="#0A0A0B">
+          </div>
+          <div class="color-item">
+            <label>Superficies (Tarjetas)</label>
+            <input type="color" id="colorSurface" value="#1B1B1E">
+          </div>
+          <div class="color-item">
+            <label>Texto Primario</label>
+            <input type="color" id="colorText" value="#F5F5F4">
+          </div>
+        </div>
+        <button class="btn" onclick="saveColors()">Aplicar Colores a la Web</button>
+      </section>
+
+      <section id="backup" class="tab-content">
+        <h2 class="section-title">Centro de Backups</h2>
+        
+        <div class="backup-grid">
+          <div class="backup-card">
+            <div class="backup-icon">📥</div>
+            <h3>Exportar Datos</h3>
+            <p>Descarga un archivo JSON con todo el contenido actual y configuraciones. Ideal para migraciones de servidor o copias de seguridad.</p>
+            <button class="btn" style="width:100%" onclick="exportBackup()">Descargar Backup</button>
+          </div>
+
+          <div class="backup-card">
+            <div class="backup-icon">📤</div>
+            <h3>Restaurar Datos</h3>
+            <p>Sube un archivo JSON de respaldo previo para sobrescribir y restaurar todo el panel a un estado guardado anteriormente.</p>
+            <input type="file" id="backupFileInput" accept=".json" style="margin-bottom:15px; width:100%;">
+            <button class="btn btn-outline" style="width:100%" onclick="importBackup()">Restaurar Backup</button>
+          </div>
+        </div>
+      </section>
       
-      <button class="btn" style="width: 100%;" onclick="addVideo()">Agregar a la Playlist</button>
-    </section>
-  </aside>
-
-  <section class="card">
-    <h2 class="card-title">Gestión de la Playlist (<span id="videoCount">0</span>)</h2>
-    <div class="video-list" id="videoList"></div>
-  </section>
-
+    </div>
+  </div>
 </main>
 
-<div id="toast">Cambios guardados con éxito</div>
+<div class="toast" id="toastMsg">Guardado con éxito</div>
 
 <script>
-  // ============ 1. CONFIGURACIÓN DE SUPBASE ============
-  const SUPABASE_URL = 'PON_TU_URL_AQUI'; // Ej: https://xyz.supabase.co
-  const SUPABASE_KEY = 'PON_TU_ANON_KEY_AQUI';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  let videos = [];
-
-  const listContainer = document.getElementById('videoList');
-  const countLabel = document.getElementById('videoCount');
-  const ytUrlInput = document.getElementById('ytUrl');
-  const ytPreview = document.getElementById('ytPreview');
-  const vidIdInput = document.getElementById('vidId');
-  const vidTitleInput = document.getElementById('vidTitle');
-  const vidDurationInput = document.getElementById('vidDuration');
-
-  // ============ 2. INICIALIZAR Y CARGAR DATOS ============
-  async function initAdmin() {
-    // Textos
-    const { data: settings } = await supabase.from('web_settings').select('*').eq('id', 1).single();
-    if (settings) {
-      document.getElementById('webEyebrow').value = settings.eyebrow;
-      document.getElementById('webTitle').value = settings.title;
-      document.getElementById('webDesc').value = settings.description;
+  // ============ INICIALIZACIÓN CON DATOS DE EJEMPLO ============
+  function initDefaults() {
+    if (!localStorage.getItem('web_videos')) {
+      const ejemplos = [
+        { id: "1_zgKRBrT0Y", title: "ANUEL AA - EL NENE", type: "artista", img: "https://i.imgur.com/P1Fm3xZ.jpg" },
+        { id: "P2QzHtzKj-U", title: "BAD BUNNY", type: "mix", img: "" }
+      ];
+      localStorage.setItem('web_videos', JSON.stringify(ejemplos));
     }
+  }
+
+  window.onload = () => {
+    initDefaults();
+    loadPlaylistUI();
+    loadColorsUI();
+    updatePreview(); // Inicializar vista previa
     
-    // Lista de Videos
-    const { data: playlist } = await supabase.from('playlist').select('*').order('created_at', { ascending: true });
-    if (playlist) {
-      videos = playlist;
-      renderVideoList();
-    }
+    // Listeners para Vista Previa en Vivo
+    document.getElementById('vidTitle').addEventListener('input', updatePreview);
+    document.getElementById('artistImg').addEventListener('input', updatePreview);
+    document.getElementById('vidType').addEventListener('change', updatePreview);
+  };
+
+  // ============ NAVEGACIÓN Y UTILIDADES ============
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMsg');
+    t.innerText = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+  }
+
+  // ============ VISTA PREVIA ============
+  function updatePreview() {
+    const title = document.getElementById('vidTitle').value || 'Nombre del Artista';
+    const imgUrl = document.getElementById('artistImg').value || 'https://via.placeholder.com/400x300/1B1B1E/F5F5F4?text=Sube+una+foto';
+    const type = document.getElementById('vidType').value;
+
+    document.getElementById('prevTitle').innerText = title;
+    document.getElementById('prevImg').src = imgUrl;
+    document.getElementById('prevBadge').innerHTML = getBadgeHTML(type);
+  }
+
+  // ============ LÓGICA YOUTUBE Y CONTENIDO ============
+  function addLinkField() {
+    const container = document.getElementById('linkContainer');
+    const div = document.createElement('div');
+    div.className = 'yt-link-row';
+    div.innerHTML = `<input type="url" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=..."><button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
+    container.appendChild(div);
   }
 
   function extractYouTubeID(url) {
@@ -157,108 +301,148 @@
     return (match && match[2].length === 11) ? match[2] : null;
   }
 
-  function processYouTubeUrl() {
-    const url = ytUrlInput.value.trim();
-    const videoID = extractYouTubeID(url);
-    if (videoID) {
-      vidIdInput.value = videoID;
-      ytPreview.innerHTML = `<img src="https://img.youtube.com/vi/${videoID}/hqdefault.jpg" alt="Portada de YouTube">`;
-      if(!vidTitleInput.value) vidTitleInput.focus();
+  function savePlaylist() {
+    const title = document.getElementById('vidTitle').value || 'Sin Título';
+    const type = document.getElementById('vidType').value;
+    const img = document.getElementById('artistImg').value;
+    const inputs = document.querySelectorAll('.yt-url-input');
+    let videos = JSON.parse(localStorage.getItem('web_videos')) || [];
+    
+    let addedCount = 0;
+    inputs.forEach(input => {
+      const ytID = extractYouTubeID(input.value);
+      if (ytID) {
+        videos.push({ id: ytID, title: title, type: type, img: img });
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      localStorage.setItem('web_videos', JSON.stringify(videos));
+      showToast(`${addedCount} registro(s) guardado(s)`);
+      // Resetear form y vista previa
+      document.getElementById('vidTitle').value = '';
+      document.getElementById('artistImg').value = '';
+      inputs.forEach(i => i.value = '');
+      updatePreview();
+      loadPlaylistUI();
     } else {
-      vidIdInput.value = '';
-      ytPreview.innerHTML = `<span>URL no válida</span>`;
+      alert("Por favor inserta links válidos de YouTube.");
     }
   }
 
-  function renderVideoList() {
-    listContainer.innerHTML = '';
-    countLabel.textContent = videos.length;
+  function getBadgeHTML(type) {
+    if (type === 'artista') return `<span class="badge badge-artista">Artista Solo</span>`;
+    if (type === 'playlist-artista') return `<span class="badge badge-playlist-artista">Playlist Artista</span>`;
+    return `<span class="badge badge-mix">Mix General</span>`;
+  }
 
-    videos.forEach((vid, index) => {
-      const article = document.createElement('article');
-      article.className = 'video-item';
-      article.innerHTML = `
-        <div class="video-thumb">
-          <img src="https://img.youtube.com/vi/${vid.id}/hqdefault.jpg" onerror="this.src='https://via.placeholder.com/640x360/1b1b1e/9a9a9e?text=No+Image'">
+  function loadPlaylistUI() {
+    const videos = JSON.parse(localStorage.getItem('web_videos')) || [];
+    const list = document.getElementById('currentPlaylist');
+    list.innerHTML = '';
+    videos.forEach((v, index) => {
+      const safeImg = v.img ? v.img : 'https://via.placeholder.com/40/1B1B1E/F5F5F4?text=X';
+      const li = document.createElement('li');
+      li.style.cssText = "background:var(--surface-2); padding:10px 15px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); flex-wrap: wrap; gap: 10px;";
+      li.innerHTML = `
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <img src="${safeImg}" class="thumb-img" alt="thumb">
+          <div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-family:'Oswald'; font-size:1.1rem;">${v.title}</span>
+              ${getBadgeHTML(v.type || 'mix')}
+            </div>
+            <small style="color:var(--gray);">YouTube ID: ${v.id}</small>
+          </div>
         </div>
-        <div class="video-info">
-          <h4>${vid.title}</h4>
-          <p>ID: ${vid.id} • Duración: ${vid.duration}</p>
-        </div>
-        <div class="video-actions">
-          <button class="delete" onclick="deleteVideo('${vid.id}', ${index})">Eliminar BD</button>
-        </div>
+        <button class="remove-btn" style="padding:8px 15px" onclick="removeVideo(${index})">Eliminar</button>
       `;
-      listContainer.appendChild(article);
+      list.appendChild(li);
     });
   }
 
-  // ============ 3. OPERACIONES EN LA BASE DE DATOS ============
-  
-  async function addVideo() {
-    const id = vidIdInput.value.trim();
-    const title = vidTitleInput.value.trim();
-    const duration = vidDurationInput.value.trim() || "00:00";
+  function removeVideo(index) {
+    let videos = JSON.parse(localStorage.getItem('web_videos')) || [];
+    videos.splice(index, 1);
+    localStorage.setItem('web_videos', JSON.stringify(videos));
+    loadPlaylistUI();
+  }
 
-    if (!id || !title) { alert("Por favor ingresa una URL válida de YouTube y un título."); return; }
-
-    const newVideo = { id, title, duration };
-    
-    // Insertar en Supabase
-    const { data, error } = await supabase.from('playlist').insert([newVideo]).select();
-    
-    if (error) {
-      showToast("Error al guardar en Supabase");
-      console.error(error);
-    } else {
-      videos.push(data[0]); // Añade el objeto retornado con su db_id
-      ytUrlInput.value = ''; vidIdInput.value = ''; vidTitleInput.value = ''; vidDurationInput.value = '';
-      ytPreview.innerHTML = `<span>La portada aparecerá aquí</span>`;
-      renderVideoList();
-      showToast("Video insertado en la Base de Datos");
+  function clearPlaylist() {
+    if(confirm("¿Estás seguro que deseas borrar todo el contenido?")) {
+      localStorage.removeItem('web_videos');
+      loadPlaylistUI();
+      showToast("Contenido vaciado");
     }
   }
 
-  async function deleteVideo(youtubeId, index) {
-    if(confirm("¿Seguro que deseas eliminar este video permanentemente?")) {
-      // Borrar de Supabase
-      const { error } = await supabase.from('playlist').delete().eq('id', youtubeId);
-      if(error) {
-        showToast("Error al eliminar");
-      } else {
-        videos.splice(index, 1);
-        renderVideoList();
-        showToast("Video eliminado de la BD");
-      }
+  // ============ COLORES ============
+  function saveColors() {
+    const colors = {
+      red: document.getElementById('colorRed').value,
+      black: document.getElementById('colorBlack').value,
+      surface: document.getElementById('colorSurface').value,
+      text: document.getElementById('colorText').value
+    };
+    localStorage.setItem('web_colors', JSON.stringify(colors));
+    showToast("Colores actualizados.");
+  }
+
+  function loadColorsUI() {
+    const colors = JSON.parse(localStorage.getItem('web_colors'));
+    if (colors) {
+      document.getElementById('colorRed').value = colors.red;
+      document.getElementById('colorBlack').value = colors.black;
+      document.getElementById('colorSurface').value = colors.surface;
+      document.getElementById('colorText').value = colors.text;
     }
   }
 
-  async function saveAllChanges() {
-    const config = {
-      eyebrow: document.getElementById('webEyebrow').value,
-      title: document.getElementById('webTitle').value,
-      description: document.getElementById('webDesc').value,
+  // ============ SISTEMA DE BACKUP ============
+  function exportBackup() {
+    const data = {
+      videos: JSON.parse(localStorage.getItem('web_videos')) || [],
+      colors: JSON.parse(localStorage.getItem('web_colors')) || null
     };
     
-    // Actualizar Textos en Supabase
-    const { error } = await supabase.from('web_settings').update(config).eq('id', 1);
-    
-    if (error) {
-      showToast("Error al actualizar textos");
-    } else {
-      showToast("Textos principales actualizados en vivo");
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "lamovie_backup.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    showToast("Backup exportado correctamente");
+  }
+
+  function importBackup() {
+    const fileInput = document.getElementById('backupFileInput');
+    if (!fileInput.files.length) {
+      alert("Selecciona un archivo JSON primero.");
+      return;
     }
-  }
 
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
 
-  initAdmin();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.videos) localStorage.setItem('web_videos', JSON.stringify(data.videos));
+        if (data.colors) localStorage.setItem('web_colors', JSON.stringify(data.colors));
+        
+        loadPlaylistUI();
+        loadColorsUI();
+        
+        showToast("Backup restaurado correctamente");
+        fileInput.value = ""; // Resetear el input
+      } catch (err) {
+        alert("El archivo no es válido o está corrupto.");
+      }
+    };
+    reader.readAsText(file);
+  }
 </script>
 </body>
 </html>
-
