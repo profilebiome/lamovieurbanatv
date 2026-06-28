@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="LA MOVIE URBANA TV - Playlist Promocional & Administración">
+<meta name="description" content="LA MOVIE URBANA TV - Playlist Promocional">
 <title>LA MOVIE URBANA TV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  /* ============ TOKENS Y VARIABLES UNIFICADAS ============ */
+  /* ============ TOKENS Y VARIABLES ============ */
   :root{
     --black:      #0A0A0B;
     --black-soft: #131315;
@@ -25,13 +24,11 @@
     --red:        #E4002B;
     --red-deep:   #9E0020;
     --red-glow:   rgba(228,0,43,0.35);
-    --success:    #10B981;
-    --danger:     #EF4444;
   }
 
   /* ============ RESET Y TIPOGRAFÍA ============ */
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html{ scrollbar-width:thin; scrollbar-color:var(--red) var(--black); scroll-behavior: smooth; }
+  html{ scrollbar-width:thin; scrollbar-color:var(--red) var(--black); }
 
   body{
     background:var(--black);
@@ -71,7 +68,7 @@
   }
 
   /* ============ CABECERA (HEADER) ============ */
-  header.main-header{
+  header{
     position:fixed; top:0; left:0; width:100%;
     padding:22px 5vw;
     display:flex; justify-content:space-between; align-items:center;
@@ -159,7 +156,7 @@
 
   /* ============ SECCIÓN PLAYLIST ============ */
   .playlist-section{
-    padding:90px 0 60px;
+    padding:90px 0 110px;
     position:relative;
   }
 
@@ -201,184 +198,301 @@
     0%{ left:-100%; } 50%{ left:0%; } 100%{ left:100%; }
   }
 
-  .nav-controls{ display:flex; gap:10px; align-items:center; }
-  .nav-btn{
-    width:46px; height:46px; border-radius:50%;
-    border:1px solid var(--line-strong); background:var(--surface); color:var(--white);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.25s ease;
+  .nav-controls{
+    display:flex; gap:10px; align-items:center;
   }
-  .nav-btn:hover{ background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+  .nav-btn{
+    width:46px; height:46px;
+    border-radius:50%;
+    border:1px solid var(--line-strong);
+    background:var(--surface);
+    color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:all 0.25s ease;
+  }
+  .nav-btn:hover{
+    background:var(--red);
+    border-color:var(--red);
+    transform:translateY(-2px);
+  }
   .nav-btn:disabled{ opacity:0.3; cursor:default; }
   .nav-btn:disabled:hover{ background:var(--surface); border-color:var(--line-strong); transform:none; }
 
-  .progress-track{ width:120px; height:3px; background:var(--surface-2); border-radius:3px; overflow:hidden; margin-left:8px; }
-  .progress-fill{ height:100%; width:25%; background:var(--red); border-radius:3px; transition:width 0.25s ease; }
+  .progress-track{
+    width:120px; height:3px;
+    background:var(--surface-2);
+    border-radius:3px;
+    overflow:hidden;
+    margin-left:8px;
+  }
+  .progress-fill{
+    height:100%; width:25%;
+    background:var(--red);
+    border-radius:3px;
+    transition:width 0.25s ease;
+  }
 
   /* ============ CARRUSEL DE VIDEOS ============ */
-  .carousel-viewport{ overflow:hidden; padding:8px 0 24px; }
+  .carousel-viewport{
+    overflow:hidden;
+    padding:8px 0 24px;
+  }
+
   .carousel-track{
-    display:flex; gap:26px; padding:0 5vw; overflow-x:auto;
-    scroll-snap-type:x mandatory; scroll-behavior:smooth; scroll-padding-left:5vw; cursor:grab;
+    display:flex;
+    gap:26px;
+    padding:0 5vw;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    scroll-padding-left:5vw;
+    cursor:grab;
   }
   .carousel-track.dragging{ cursor:grabbing; scroll-behavior:auto; }
   .carousel-track::-webkit-scrollbar{ display:none; }
   .carousel-track{ scrollbar-width:none; }
 
-  .video-card{ flex:0 0 auto; width:min(340px, 78vw); scroll-snap-align:start; position:relative; user-select:none; }
+  .video-card{
+    flex:0 0 auto;
+    width:min(340px, 78vw);
+    scroll-snap-align:start;
+    position:relative;
+    user-select:none;
+  }
+
   .card-frame{
-    position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--line);
-    background:var(--surface); transition:transform 0.4s cubic-bezier(.2,.8,.2,1), border-color 0.4s ease, box-shadow 0.4s ease;
+    position:relative;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:var(--surface);
+    transition:transform 0.4s cubic-bezier(.2,.8,.2,1), border-color 0.4s ease, box-shadow 0.4s ease;
   }
   .video-card:hover .card-frame{
-    transform:translateY(-8px); border-color:var(--red);
+    transform:translateY(-8px);
+    border-color:var(--red);
     box-shadow:0 22px 45px rgba(0,0,0,0.55), 0 0 0 1px var(--red-glow);
   }
 
-  .thumb-wrap{ position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--black-soft); }
-  .thumb-wrap img{ width:100%; height:100%; object-fit:cover; transition:transform 0.6s ease, filter 0.4s ease; filter:grayscale(0.25) brightness(0.85); }
-  .video-card:hover .thumb-wrap img{ transform:scale(1.1); filter:grayscale(0) brightness(1); }
-  .thumb-wrap::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 50%, rgba(10,10,11,0.92) 100%); }
+  .thumb-wrap{
+    position:relative;
+    aspect-ratio:16/10;
+    overflow:hidden;
+    background:var(--black-soft);
+  }
+  .thumb-wrap img{
+    width:100%; height:100%; object-fit:cover;
+    transition:transform 0.6s ease, filter 0.4s ease;
+    filter:grayscale(0.25) brightness(0.85);
+  }
+  .video-card:hover .thumb-wrap img{
+    transform:scale(1.1);
+    filter:grayscale(0) brightness(1);
+  }
 
-  .play-overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:5; opacity:0; transition:opacity 0.3s ease; }
+  .thumb-wrap::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 50%, rgba(10,10,11,0.92) 100%);
+  }
+
+  .play-overlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    z-index:5;
+    opacity:0;
+    transition:opacity 0.3s ease;
+  }
   .video-card:hover .play-overlay{ opacity:1; }
 
-  .play-circle{ width:56px; height:56px; border-radius:50%; background:var(--red); display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 0 var(--red-glow); transition:transform 0.3s ease; }
-  .video-card:hover .play-circle{ transform:scale(1.08); box-shadow:0 0 0 14px transparent, 0 8px 24px var(--red-glow); }
+  .play-circle{
+    width:56px; height:56px;
+    border-radius:50%;
+    background:var(--red);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 0 var(--red-glow);
+    transition:transform 0.3s ease;
+  }
+  .video-card:hover .play-circle{
+    transform:scale(1.08);
+    box-shadow:0 0 0 14px transparent, 0 8px 24px var(--red-glow);
+  }
   .play-circle svg{ width:20px; height:20px; fill:var(--white); margin-left:2px; }
 
   .card-index{
-    position:absolute; top:14px; left:14px; font-family:'Oswald', sans-serif; font-size:0.75rem;
-    letter-spacing:1px; color:var(--white); background:rgba(10,10,11,0.6); border:1px solid var(--line-strong); padding:4px 9px; border-radius:6px; z-index:6;
+    position:absolute; top:14px; left:14px;
+    font-family:'Oswald', sans-serif;
+    font-size:0.75rem;
+    letter-spacing:1px;
+    color:var(--white);
+    background:rgba(10,10,11,0.6);
+    border:1px solid var(--line-strong);
+    padding:4px 9px;
+    border-radius:6px;
+    z-index:6;
   }
-  .card-body{ padding:18px 18px 22px; }
-  .card-title{ font-family:'Oswald', sans-serif; font-size:1.18rem; line-height:1.25; text-transform:uppercase; margin-bottom:14px; min-height:2.5em; }
-  .card-footer{ display:flex; align-items:center; justify-content:space-between; }
+
+  .card-body{
+    padding:18px 18px 22px;
+  }
+
+  .card-title{
+    font-family:'Oswald', sans-serif;
+    font-size:1.18rem;
+    line-height:1.25;
+    text-transform:uppercase;
+    margin-bottom:14px;
+    min-height:2.5em;
+  }
+
+  .card-footer{
+    display:flex; align-items:center; justify-content:space-between;
+  }
 
   .btn-play{
-    display:inline-flex; align-items:center; gap:8px; font-size:0.72rem; font-weight:800; letter-spacing:1.5px;
-    text-transform:uppercase; color:var(--white); background:transparent; border:none; cursor:pointer; padding:0; transition:color 0.25s ease, gap 0.25s ease;
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.72rem; font-weight:800; letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--white);
+    background:transparent;
+    border:none; cursor:pointer;
+    padding:0;
+    transition:color 0.25s ease, gap 0.25s ease;
   }
   .btn-play:hover{ color:var(--red); gap:12px; }
   .btn-play svg{ width:13px; height:13px; fill:currentColor; }
-  .card-duration{ font-size:0.72rem; color:var(--gray-dim); letter-spacing:1px; }
 
-  .dots{ display:flex; justify-content:center; gap:8px; margin-top:36px; }
-  .dot-item{ width:7px; height:7px; border-radius:50%; background:var(--surface-2); cursor:pointer; transition:all 0.3s ease; }
-  .dot-item.active{ background:var(--red); width:22px; border-radius:5px; }
+  .card-duration{
+    font-size:0.72rem; color:var(--gray-dim); letter-spacing:1px;
+  }
 
-  /* ============ FORMULARIO DE ACCESO (LOGIN) ============ */
-  .auth-section {
-    padding: 60px 5vw 90px;
+  .dots{
+    display:flex; justify-content:center; gap:8px;
+    margin-top:36px;
+  }
+  .dot-item{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--surface-2);
+    cursor:pointer;
+    transition:all 0.3s ease;
+  }
+  .dot-item.active{
+    background:var(--red);
+    width:22px; border-radius:5px;
+  }
+
+  /* ============ LOGIN ADMIN ============ */
+  .admin-login {
+    padding: 60px 5vw;
     display: flex;
     justify-content: center;
-    align-items: center;
-    position: relative;
     border-top: 1px solid var(--line);
   }
-  .auth-card {
-    width: 100%;
-    max-width: 400px;
+  .login-box {
     background: var(--surface);
     border: 1px solid var(--line-strong);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    transition: border-color 0.3s ease;
-  }
-  .auth-card:hover {
-    border-color: rgba(228,0,43,0.4);
-  }
-  .auth-card .card-title {
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .login-box h3 {
+    font-family: 'Oswald', sans-serif;
     font-size: 1.4rem;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 20px;
     letter-spacing: 1px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    background: var(--black);
+    border: 1px solid var(--line);
     color: var(--white);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s;
   }
-  .auth-card .card-title span { color: var(--red); }
-  .auth-card .form-group { margin-bottom: 20px; }
-  .auth-card label { display: block; font-size: 0.8rem; color: var(--gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-  .auth-card input {
-    width: 100%; background: var(--black); border: 1px solid var(--line-strong); color: var(--white);
-    padding: 14px; border-radius: 8px; font-family: inherit; transition: all 0.3s ease;
+  .login-box input:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px var(--red-glow);
   }
-  .auth-card input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 10px rgba(228,0,43,0.15); }
-  
-  .btn-submit {
-    width: 100%; display: flex; align-items: center; justify-content: center; background: var(--red);
-    color: var(--white); border: none; padding: 14px; border-radius: 8px; font-weight: 700;
-    cursor: pointer; transition: all 0.25s ease; font-family: inherit; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
   }
-  .btn-submit:hover { background: var(--red-deep); transform: translateY(-2px); box-shadow: 0 5px 15px var(--red-glow); }
-  .auth-error { color: var(--danger); font-size: 0.8rem; text-align: center; margin-top: 12px; display: none; font-weight: 600; }
-
-  /* ============ ESTILOS DEL PANEL DE ADMINISTRACIÓN ============ */
-  #adminView {
-    padding: 40px 5vw;
-    max-width: 1300px;
-    margin: 0 auto;
+  .btn-login:hover {
+    background: #ff0033;
+    box-shadow: 0 0 15px var(--red-glow);
   }
-  .admin-header {
-    margin-bottom: 40px; border-bottom: 1px solid var(--line-strong); padding-bottom: 20px;
-    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
-  }
-  .admin-header h1 { font-family: 'Oswald', sans-serif; font-size: 2.2rem; letter-spacing: 1px; text-transform: uppercase; }
-  .admin-header h1 span { color: var(--red); }
-  .admin-actions { display: flex; gap: 12px; }
-
-  .admin-layout { display: grid; grid-template-columns: 1fr; gap: 30px; }
-  @media (min-width: 992px) { .admin-layout { grid-template-columns: 380px 1fr; } }
-
-  .admin-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
-  .admin-card .card-title { font-size: 1.2rem; margin-bottom: 20px; color: var(--gray); border-bottom: 1px solid var(--line); padding-bottom: 10px; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
-  
-  .form-group-admin { margin-bottom: 18px; }
-  .form-group-admin label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 6px; letter-spacing: 0.5px; }
-  .form-group-admin input, .form-group-admin textarea {
-    width: 100%; background: var(--black); border: 1px solid var(--line-strong); color: var(--white); padding: 12px; border-radius: 8px; font-family: inherit; transition: border-color 0.3s ease;
-  }
-  .form-group-admin input:focus, .form-group-admin textarea:focus { outline: none; border-color: var(--red); }
-
-  .btn-admin {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--red); color: var(--white); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; font-family: inherit; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
-  }
-  .btn-admin:hover { background: var(--red-deep); transform: translateY(-2px); }
-  .btn-admin-outline { background: transparent; border: 1px solid var(--line-strong); }
-  .btn-admin-outline:hover { background: var(--black); border-color: var(--red); }
-  .btn-admin-danger { background: var(--danger); }
-  .btn-admin-danger:hover { background: #b91c1c; }
-
-  .yt-preview { width: 100%; aspect-ratio: 16/9; background: var(--black); border-radius: 8px; margin-top: 10px; border: 1px dashed var(--line-strong); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-  .yt-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .yt-preview span { color: var(--gray-dim); font-size: 0.85rem; }
-
-  .video-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 20px; }
-  .video-item { background: var(--black-soft); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-  .video-thumb { aspect-ratio: 16/9; background: #000; }
-  .video-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-  .video-info { padding: 16px; flex-grow: 1; }
-  .video-info h4 { font-size: 1rem; margin-bottom: 4px; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
-  .video-info p { font-size: 0.8rem; color: var(--gray); }
-  .video-actions { display: flex; border-top: 1px solid var(--line); }
-  .video-actions button { flex: 1; padding: 12px; background: transparent; border: none; color: var(--gray); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; font-family: inherit; }
-  .video-actions button:hover { background: var(--surface); color: var(--white); }
-  .video-actions .delete:hover { color: var(--danger); }
-
-  /* ============ TOAST (NOTIFICACIONES) ============ */
-  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: #fff; padding: 12px 24px; border-radius: 8px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.5px; }
-  #toast.show { transform: translateY(0); opacity: 1; }
 
   /* ============ FOOTER ============ */
-  footer{ padding:50px 5vw 60px; border-top:1px solid var(--line); display:flex; justify-content:center; align-items:center; text-align:center; color:var(--gray-dim); font-size:0.75rem; letter-spacing:1px; }
-  footer .logo-small{ color:var(--gray); letter-spacing:1px; margin-right:5px; font-weight:600; }
+  footer{
+    padding:30px 5vw 60px;
+    display:flex; justify-content:center; align-items:center;
+    text-align:center;
+    color:var(--gray-dim);
+    font-size:0.75rem;
+    letter-spacing:1px;
+  }
+  footer .logo-small{ 
+    color:var(--gray); 
+    letter-spacing:1px; 
+    margin-right:5px; 
+    font-weight:600;
+  }
   footer .logo-small span{ color:var(--red); }
 
   /* ============ MODAL DE VIDEO ============ */
-  .modal{ position:fixed; inset:0; background:rgba(5,5,6,0.96); z-index:300; display:none; align-items:center; justify-content:center; opacity:0; transition:opacity 0.35s ease; }
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(5,5,6,0.96);
+    z-index:300;
+    display:none;
+    align-items:center; justify-content:center;
+    opacity:0;
+    transition:opacity 0.35s ease;
+  }
   .modal.active{ display:flex; opacity:1; }
-  .close-btn{ position:absolute; top:24px; right:30px; width:46px; height:46px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; color:var(--white); font-size:1.6rem; cursor:pointer; z-index:310; transition:all 0.25s ease; background:var(--surface); }
+
+  .close-btn{
+    position:absolute; top:24px; right:30px;
+    width:46px; height:46px;
+    border-radius:50%;
+    border:1px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--white);
+    font-size:1.6rem;
+    cursor:pointer;
+    z-index:310;
+    transition:all 0.25s ease;
+    background:var(--surface);
+  }
   .close-btn:hover{ background:var(--red); border-color:var(--red); transform:rotate(90deg); }
-  .video-container{ width:90%; max-width:1200px; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px var(--line-strong); }
+
+  .video-container{
+    width:90%; max-width:1200px;
+    aspect-ratio:16/9;
+    background:#000;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px var(--line-strong);
+  }
   iframe{ width:100%; height:100%; border:none; }
 
   /* ============ DISEÑO RESPONSIVO ============ */
@@ -387,17 +501,12 @@
     .section-head{ align-items:flex-start; }
     .nav-controls{ display:none; }
     .video-card{ width:82vw; }
-    .admin-header { flex-direction: column; align-items: flex-start; }
-    .admin-actions { width: 100%; }
-    .admin-actions button { flex: 1; text-align: center; }
   }
 
   @media (prefers-reduced-motion:reduce){
     #dynamic-bg, .scroll-cue .line::after { animation:none; }
     *{ transition-duration:0.01ms !important; }
   }
-
-  :focus-visible{ outline:2px solid var(--red); outline-offset:3px; }
 </style>
 </head>
 <body>
@@ -406,266 +515,111 @@
 <div class="bg-overlay"></div>
 <div class="grain"></div>
 
-<div id="publicView">
-  <header class="main-header">
-    <h1 class="logo"><span class="dot"></span>LA MOVIE <span>URBANA</span> TV</h1>
-  </header>
+<header>
+  <h1 class="logo"><span class="dot"></span>LA MOVIE <span>URBANA</span> TV</h1>
+</header>
 
-  <section class="hero">
-    <div class="eyebrow">Artistas Trending</div>
-    <h1>ARTISTAS<br><em>URBANOS</em></h1>
-    <p>Exclusivas seleccionadas. Desliza el carrusel para explorar la playlist completa y reproduce directamente.</p>
-    <div class="hero-meta">
-      <div><span class="num" id="metaCount">04</span><span class="label">Videos</span></div>
-      <div><span class="num">4K</span><span class="label">Calidad</span></div>
-      <div><span class="num">24/7</span><span class="label">Contenido</span></div>
+<section class="hero">
+  <div class="eyebrow">Artistas Trending</div>
+  <h1>ARTISTAS<br><em>URBANOS</em></h1>
+  <p>Exclusivas seleccionadas. Desliza el carrusel para explorar la playlist completa y reproduce directamente.</p>
+  <div class="hero-meta">
+    <div><span class="num" id="metaCount">00</span><span class="label">Videos</span></div>
+    <div><span class="num">4K</span><span class="label">Calidad</span></div>
+    <div><span class="num">24/7</span><span class="label">Contenido</span></div>
+  </div>
+</section>
+
+<section class="playlist-section" id="playlist">
+  <div class="section-head">
+    <div class="head-titles">
+      <h2>Playlist <span>Official</span></h2>
+      <div class="scroll-cue"><span class="line"></span>Desliza para ver la playlist</div>
     </div>
-  </section>
-
-  <section class="playlist-section" id="playlist">
-    <div class="section-head">
-      <div class="head-titles">
-        <h2>Playlist <span>Official</span></h2>
-        <div class="scroll-cue"><span class="line"></span>Desliza para ver la playlist</div>
-      </div>
-      <div class="nav-controls">
-        <button class="nav-btn" id="prevBtn" aria-label="Anterior">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="nav-btn" id="nextBtn" aria-label="Siguiente">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      </div>
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" aria-label="Anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="nextBtn" aria-label="Siguiente">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     </div>
+  </div>
 
-    <div class="carousel-viewport">
-      <div class="carousel-track" id="carouselTrack"></div>
-    </div>
+  <div class="carousel-viewport">
+    <div class="carousel-track" id="carouselTrack"></div>
+  </div>
 
-    <div class="dots" id="dotsRow"></div>
-  </section>
+  <div class="dots" id="dotsRow"></div>
+</section>
 
-  <section class="auth-section">
-    <div class="auth-card">
-      <h3 class="card-title">Panel de <span>Control</span></h3>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="admin@lamovieurbana.tv">
-        </div>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" required placeholder="••••••••">
-        </div>
-        <button type="submit" class="btn-submit">Ingresar al Sistema</button>
-        <div class="auth-error" id="authError">Credenciales incorrectas. Inténtalo de nuevo.</div>
-      </form>
-    </div>
-  </section>
+<section class="admin-login" id="adminAcceso">
+  <div class="login-box">
+    <h3>Acceso a Panel</h3>
+    <form id="loginForm">
+      <input type="text" id="adminUser" placeholder="Usuario" required>
+      <input type="password" id="adminPass" placeholder="Contraseña" required>
+      <button type="submit" class="btn-login">Ingresar</button>
+      <p id="loginError" style="color:var(--red); display:none; margin-top:15px; font-size:0.85rem; font-weight:600;">Credenciales incorrectas.</p>
+    </form>
+  </div>
+</section>
 
-  <footer>
-    <div class="footer-text">
-      <span class="logo-small">LA MOVIE <span>URBANA</span> TV</span> © 2026 · Todos los derechos reservados
-    </div>
-  </footer>
-</div>
-
-<div id="adminView" style="display: none;">
-  <header class="admin-header">
-    <h1>Admin <span>Panel</span></h1>
-    <div class="admin-actions">
-      <button class="btn-admin btn-admin-outline" onclick="saveAllChanges()">Guardar Textos en la Web</button>
-      <button class="btn-admin btn-admin-danger" onclick="handleLogout()">Cerrar Sesión</button>
-    </div>
-  </header>
-
-  <main class="admin-layout">
-    <aside>
-      <section class="admin-card" style="margin-bottom: 24px;">
-        <h2 class="card-title">Textos Principales</h2>
-        <div class="form-group-admin">
-          <label>Etiqueta Superior (Eyebrow)</label>
-          <input type="text" id="webEyebrow" placeholder="Cargando...">
-        </div>
-        <div class="form-group-admin">
-          <label>Título Principal (Usa &lt;br&gt; y &lt;em&gt;)</label>
-          <input type="text" id="webTitle" placeholder="Cargando...">
-        </div>
-        <div class="form-group-admin">
-          <label>Descripción</label>
-          <textarea id="webDesc" rows="3" placeholder="Cargando..."></textarea>
-        </div>
-      </section>
-
-      <section class="admin-card">
-        <h2 class="card-title">Agregar Nuevo Video</h2>
-        <div class="form-group-admin">
-          <label>Enlace de YouTube (URL)</label>
-          <input type="url" id="ytUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="processYouTubeUrl()">
-        </div>
-        
-        <div class="yt-preview" id="ytPreview">
-          <span>La portada aparecerá aquí</span>
-        </div>
-
-        <div class="form-group-admin" style="margin-top: 16px;">
-          <label>ID del Video (Automático)</label>
-          <input type="text" id="vidId" readonly placeholder="Ej: aBcDeFgHiJk">
-        </div>
-        <div class="form-group-admin">
-          <label>Título del Video</label>
-          <input type="text" id="vidTitle" placeholder="Ingresa el título para mostrar">
-        </div>
-        <div class="form-group-admin">
-          <label>Duración (Min:Seg)</label>
-          <input type="text" id="vidDuration" placeholder="03:45">
-        </div>
-        
-        <button class="btn-admin" style="width: 100%;" onclick="addVideo()">Agregar a la Playlist</button>
-      </section>
-    </aside>
-
-    <section class="admin-card">
-      <h2 class="card-title">Gestión de la Playlist (<span id="videoCount">0</span>)</h2>
-      <div class="video-list" id="videoList"></div>
-    </section>
-  </main>
-</div>
+<footer>
+  <div class="footer-text">
+    <span class="logo-small">LA MOVIE <span>URBANA</span> TV</span> © 2026 · Todos los derechos reservados
+  </div>
+</footer>
 
 <div class="modal" id="videoModal">
   <span class="close-btn" id="closeBtn">&times;</span>
   <div class="video-container" id="player"></div>
 </div>
 
-<div id="toast">Cambios guardados con éxito</div>
-
 <script>
-  // ============ 1. CONFIGURACIÓN DE SUPABASE ============
-  const SUPABASE_URL = 'https://wxbhotzeyjlhkenzleeu.supabase.co'; 
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4YmhvdHpleWpsaGtlbnpsZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzIyNjAsImV4cCI6MjA5ODEwODI2MH0.VpogiqtNt0pJxo2uhCtMvH7jLnjTaPltZjlHvl9IoxE';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // ============ INICIALIZAR COLORES DEL PANEL ============
+  const savedColors = JSON.parse(localStorage.getItem('web_colors'));
+  if (savedColors) {
+    document.documentElement.style.setProperty('--red', savedColors.red);
+    document.documentElement.style.setProperty('--black', savedColors.black);
+    document.documentElement.style.setProperty('--surface', savedColors.surface);
+    document.documentElement.style.setProperty('--white', savedColors.text);
+  }
 
-  // Lista local en estado global reactivo (Contiene fallback estático obligatorio)
-  let videos = [];
+  // ============ DATOS CONECTADOS AL PANEL ============
+  let videos = JSON.parse(localStorage.getItem('web_videos')) || [];
+  
+  // Videos por defecto si el panel está vacío
+  if (videos.length === 0) {
+    videos = [
+      { id: "1_zgKRBrT0Y", title: "ANUEL AA - EL NENE", type: "artista" },
+      { id: "P2QzHtzKj-U", title: "BAD BUNNY - MONACO", type: "mix" }
+    ];
+  }
 
-  // Selectores de Elementos DOM
   const track = document.getElementById('carouselTrack');
   const dotsRow = document.getElementById('dotsRow');
   const progressFill = document.getElementById('progressFill');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
   
-  const listContainer = document.getElementById('videoList');
-  const countLabel = document.getElementById('videoCount');
-  const ytUrlInput = document.getElementById('ytUrl');
-  const ytPreview = document.getElementById('ytPreview');
-  const vidIdInput = document.getElementById('vidId');
-  const vidTitleInput = document.getElementById('vidTitle');
-  const vidDurationInput = document.getElementById('vidDuration');
+  // Actualizar conteo de la sección Hero
+  document.getElementById('metaCount').textContent = String(videos.length).padStart(2,'0');
 
-  // ============ 2. INICIALIZACIÓN SÍNCRONA / ASÍNCRONA VIA SUPABASE ============
-  async function initApp() {
-    // Intentar leer la sesión guardada de Supabase Auth
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        showAdminUI(true);
-      }
-    } catch(err) {
-      console.log("No se pudo comprobar la sesión inicial.");
-    }
-
-    // Cargar textos dinámicos desde la BD si están disponibles
-    try {
-      const { data: settings } = await supabase.from('web_settings').select('*').eq('id', 1).single();
-      if (settings) {
-        document.querySelector('.eyebrow').textContent = settings.eyebrow;
-        document.querySelector('.hero h1').innerHTML = settings.title;
-        document.querySelector('.hero p').textContent = settings.description;
-        
-        document.getElementById('webEyebrow').value = settings.eyebrow;
-        document.getElementById('webTitle').value = settings.title;
-        document.getElementById('webDesc').value = settings.description;
-      }
-    } catch(e) {
-      console.log("Cargando textos locales por defecto.");
-    }
-    
-    // Cargar Playlist desde Supabase si está disponible
-    try {
-      const { data: playlist } = await supabase.from('playlist').select('*').order('created_at', { ascending: true });
-      if (playlist && playlist.length > 0) {
-        videos = playlist;
-      }
-    } catch(e) {
-      console.log("No se cargaron videos de la base de datos.");
-    }
-
-    // Renderizar componentes públicos y privados simultáneamente
-    document.getElementById('metaCount').textContent = String(videos.length).padStart(2,'0');
-    renderDots();
-    renderCards(videos);
-    renderVideoList();
-    setTimeout(updateScrollUI, 200);
-  }
-
-  // ============ 3. AUTENTICACIÓN (SUPABASE AUTH) ============
-  const loginForm = document.getElementById('loginForm');
-  const authError = document.getElementById('authError');
-
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    authError.style.display = 'none';
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        authError.textContent = "Error: " + error.message;
-        authError.style.display = 'block';
-      } else {
-        showToast("Sesión Iniciada con Éxito");
-        loginForm.reset();
-        showAdminUI(true);
-      }
-    } catch(err) {
-      authError.textContent = "Error de conexión con Supabase.";
-      authError.style.display = 'block';
-    }
-  });
-
-  function showAdminUI(isAdmin) {
-    if (isAdmin) {
-      document.getElementById('publicView').style.display = 'none';
-      document.getElementById('adminView').style.display = 'block';
-    } else {
-      document.getElementById('adminView').style.display = 'none';
-      document.getElementById('publicView').style.display = 'block';
-    }
-    window.scrollTo({ top: 0 });
-  }
-
-  async function handleLogout() {
-    try {
-      await supabase.auth.signOut();
-    } catch(e) {}
-    showToast("Sesión Cerrada");
-    showAdminUI(false);
-  }
-
-  // ============ 4. RENDERIZADO DE LA WEB PÚBLICA ============
+  // ============ RENDERIZADO DE TARJETAS ============
   function cardHTML(vid, i){
+    // Usa la imagen del panel si existe, de lo contrario el thumbnail por defecto de YouTube
+    const thumbUrl = vid.img && vid.img.trim() !== '' ? vid.img : `https://img.youtube.com/vi/${vid.id}/maxresdefault.jpg`;
+    const duration = vid.duration || "EN VIVO";
+
     return `
       <article class="video-card" data-index="${i}">
         <div class="card-frame">
           <div class="thumb-wrap">
             <span class="card-index">${String(i+1).padStart(2,'0')}</span>
-            <img src="https://img.youtube.com/vi/${vid.id}/maxresdefault.jpg"
-                 alt="${vid.title}"
-                 loading="lazy"
-                 onerror="this.src='https://via.placeholder.com/640x400/1b1b1e/9a9a9e?text=THUMBNAIL'">
+            <img src="${thumbUrl}" alt="${vid.title}" loading="lazy"
+                 onerror="this.src='https://via.placeholder.com/640x400/1b1b1e/9a9a9e?text=PORTADA'">
             <div class="play-overlay">
               <div class="play-circle">
                 <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -679,7 +633,7 @@
                 <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 Reproducir
               </button>
-              <span class="card-duration">${vid.duration}</span>
+              <span class="card-duration">${duration}</span>
             </div>
           </div>
         </div>
@@ -688,7 +642,7 @@
   }
 
   function renderCards(list){
-    track.innerHTML = list.map((v,i) => cardHTML(v, videos.indexOf(v))).join('');
+    track.innerHTML = list.map((v,i) => cardHTML(v, i)).join('');
   }
 
   function renderDots(){
@@ -697,7 +651,10 @@
     ).join('');
   }
 
-  // ============ 5. LÓGICA DE GESTIÓN Y SCROLL DEL CARRUSEL ============
+  renderDots();
+  renderCards(videos);
+
+  // ============ NAVEGACIÓN Y SCROLL ============
   function cardStep(){
     const card = track.querySelector('.video-card');
     if(!card) return 360;
@@ -733,8 +690,9 @@
 
   track.addEventListener('scroll', () => requestAnimationFrame(updateScrollUI));
   window.addEventListener('resize', updateScrollUI);
+  setTimeout(updateScrollUI, 200);
 
-  // Drag-and-Scroll mecánico
+  // ============ LÓGICA DE ARRASTRE (DRAG) ============
   let isDown = false, startX, scrollStart;
   track.addEventListener('mousedown', e => {
     isDown = true;
@@ -750,7 +708,7 @@
     track.scrollLeft = scrollStart - (e.pageX - startX);
   });
 
-  // ============ 6. REPRODUCTOR MODAL COMPARTIDO ============
+  // ============ REPRODUCTOR (MODAL) ============
   const modal = document.getElementById('videoModal');
   const player = document.getElementById('player');
 
@@ -777,137 +735,22 @@
   modal.addEventListener('click', e => { if(e.target === modal) closeVideo(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeVideo(); });
 
-  // ============ 7. LÓGICA EXCLUSIVA DEL PANEL DE CONTROL ============
-  function extractYouTubeID(url) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-  }
+  // ============ LÓGICA LOGIN ADMIN ============
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
 
-  function processYouTubeUrl() {
-    const url = ytUrlInput.value.trim();
-    const videoID = extractYouTubeID(url);
-    if (videoID) {
-      vidIdInput.value = videoID;
-      ytPreview.innerHTML = `<img src="https://img.youtube.com/vi/${videoID}/hqdefault.jpg" alt="Portada de YouTube">`;
-      if(!vidTitleInput.value) vidTitleInput.focus();
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+    
+    // Credenciales por defecto para el sistema (cámbialas según necesites)
+    if (user === 'admin' && pass === 'lamovie123') {
+      window.location.href = 'admin.html'; // Asegúrate que tu panel se llame así
     } else {
-      vidIdInput.value = '';
-      ytPreview.innerHTML = `<span>URL no válida</span>`;
+      loginError.style.display = 'block';
     }
-  }
-
-  function renderVideoList() {
-    listContainer.innerHTML = '';
-    countLabel.textContent = videos.length;
-
-    videos.forEach((vid, index) => {
-      const article = document.createElement('article');
-      article.className = 'video-item';
-      article.innerHTML = `
-        <div class="video-thumb">
-          <img src="https://img.youtube.com/vi/${vid.id}/hqdefault.jpg" onerror="this.src='https://via.placeholder.com/640x360/1b1b1e/9a9a9e?text=No+Image'">
-        </div>
-        <div class="video-info">
-          <h4>${vid.title}</h4>
-          <p>ID: ${vid.id} • Duración: ${vid.duration}</p>
-        </div>
-        <div class="video-actions">
-          <button class="delete" onclick="deleteVideo('${vid.id}', ${index})">Eliminar BD</button>
-        </div>
-      `;
-      listContainer.appendChild(article);
-    });
-  }
-
-  async function addVideo() {
-    const id = vidIdInput.value.trim();
-    const title = vidTitleInput.value.trim();
-    const duration = vidDurationInput.value.trim() || "00:00";
-
-    if (!id || !title) { alert("Por favor ingresa una URL válida de YouTube y un título."); return; }
-    const newVideo = { id, title, duration };
-    
-    try {
-      const { data, error } = await supabase.from('playlist').insert([newVideo]).select();
-      if (error) {
-        showToast("Error al guardar en Supabase");
-      } else {
-        videos.push(data[0]);
-        syncAllViews();
-        ytUrlInput.value = ''; vidIdInput.value = ''; vidTitleInput.value = ''; vidDurationInput.value = '';
-        ytPreview.innerHTML = `<span>La portada aparecerá aquí</span>`;
-        showToast("Video insertado en la Base de Datos");
-      }
-    } catch(err) {
-      // Fallback local instantáneo si no está conectado
-      videos.push(newVideo);
-      syncAllViews();
-      showToast("Agregado Localmente (Sin BD)");
-    }
-  }
-
-  async function deleteVideo(youtubeId, index) {
-    if(confirm("¿Seguro que deseas eliminar este video permanentemente?")) {
-      try {
-        const { error } = await supabase.from('playlist').delete().eq('id', youtubeId);
-        if(error) {
-          showToast("Error al eliminar");
-        } else {
-          videos.splice(index, 1);
-          syncAllViews();
-          showToast("Video eliminado de la BD");
-        }
-      } catch(err) {
-        videos.splice(index, 1);
-        syncAllViews();
-        showToast("Eliminado Localmente");
-      }
-    }
-  }
-
-  async function saveAllChanges() {
-    const config = {
-      eyebrow: document.getElementById('webEyebrow').value,
-      title: document.getElementById('webTitle').value,
-      description: document.getElementById('webDesc').value,
-    };
-    
-    // Sincronización visual inmediata en la parte pública
-    document.querySelector('.eyebrow').textContent = config.eyebrow;
-    document.querySelector('.hero h1').innerHTML = config.title;
-    document.querySelector('.hero p').textContent = config.description;
-
-    try {
-      const { error } = await supabase.from('web_settings').update(config).eq('id', 1);
-      if (error) {
-        showToast("Error al actualizar textos");
-      } else {
-        showToast("Textos principales actualizados en vivo");
-      }
-    } catch(err) {
-      showToast("Actualizado en vista (Sin conexión)");
-    }
-  }
-
-  // Sincronizador global reactivo entre la vista pública y el panel privado
-  function syncAllViews() {
-    document.getElementById('metaCount').textContent = String(videos.length).padStart(2,'0');
-    renderCards(videos);
-    renderDots();
-    renderVideoList();
-    updateScrollUI();
-  }
-
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-
-  // Inicializar toda la aplicación al cargar el DOM
-  document.addEventListener('DOMContentLoaded', initApp);
+  });
 </script>
 </body>
 </html>
